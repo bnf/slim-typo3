@@ -12,6 +12,54 @@ Note: The EIDRequestHandler has higher priority and will not
 be influenced by this router. That means the slim app
 cannot accept a parameter 'eID'.
 
+Usage
+-----
+
+```sh
+composer require bnf/slim-typo3:dev-master
+```
+
+ext_localconf.php:
+```php
+$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['configureApp'][] = \Your\Namespace\TestApp::class;
+```
+
+TestApp.php
+```php
+<?php
+namespace Your\Namespace;
+
+use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\App;
+
+class TestApp implements ConfigureAppHookInterface
+{
+    public static function configure(App $app)
+    {
+        $app->add(function ($request, $response, $next) {
+            $response->getBody()->write('I am middleware.. ');
+            return $next($request, $response, $next);
+        });
+
+        $app->get('/bar[/{foo}]', static::class . ':bar');
+    }
+
+    public function bar(Request $request, Response $response)
+    {
+        $response->getBody()->write('baz');
+
+        $foo = $request->getAttribute('foo');
+        if ($foo) {
+            $response->getBody()->write(' ' . htmlspecialchars($foo));
+        }
+
+        return $response;
+    }
+}
+
+```
 
 TODO
 ----
