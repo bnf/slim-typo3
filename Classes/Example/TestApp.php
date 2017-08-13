@@ -31,6 +31,9 @@ class TestApp implements ConfigureAppHookInterface
         $app->get('/bar/', static::class . ':bar');
         $app->get('/bar[/{foo}]', static::class . ':bar');
 
+        // You can even add backend routes. HEADS UP! this performs no authentication/authorization.
+        $app->get('/typo3/foo[/{foo}]', static::class . ':bar');
+
         /* You probably don't want this. '/' should probably be handled
          * by typo3 to show your homepage. */
         //$app->get('/', function ($request, $response) {
