@@ -23,7 +23,7 @@ $EM_CONF[$_EXTKEY] = array(
     ),
     'autoload' => array(
         'psr-4' => array(
-            'Bnf\\Slim-typo3\\' => 'Classes',
+            'Bnf\\SlimTypo3\\' => 'Classes',
         ),
     ),
 );
