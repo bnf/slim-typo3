@@ -5,12 +5,16 @@ Introduction
 ------------
 
 This extension provides a TYPO3 RequestHandler which runs a Slim App.
-The Slim App will be executed when one of the routes match the request.
-If not the default TYPO3 RequestHandler will be executed.
+The Slim App will be executed when one of its routes match the request.
+If no route matches, the lower prioritized default TYPO3
+RequestHandler(s) will be executed.
+
+This request handler basically works like a TYPO3 eID (executed with identically
+environment), but with proper routing and nice looking URLs.
 
 Note: The EIDRequestHandler has higher priority and will not
 be influenced by this router. That means the slim app
-cannot accept a parameter 'eID'.
+can not accept a GET parameter `eID`.
 
 Usage
 -----
