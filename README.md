@@ -31,6 +31,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['configureApp'][] = \Your\N
 TestApp.php
 ```php
 <?php
+declare(strict_types=1);
 namespace Your\Namespace;
 
 use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
@@ -50,7 +51,7 @@ class TestApp implements ConfigureAppHookInterface
         $app->get('/bar[/{foo}]', static::class . ':bar');
     }
 
-    public function bar(Request $request, Response $response)
+    public function bar(Request $request, Response $response): Response
     {
         $response->getBody()->write('baz');
 

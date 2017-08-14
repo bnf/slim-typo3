@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 namespace Bnf\SlimTypo3\Http;
 
 use Bnf\SlimTypo3\App;
 use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\RequestHandlerInterface;
@@ -28,7 +30,7 @@ class SlimRequestHandler implements RequestHandlerInterface
     protected $apps;
 
     /**
-     * Constructor handing over the bootstrap and the original request
+     * Constructor handing over the bootstrap
      *
      * @param Bootstrap $bootstrap
      */
@@ -40,9 +42,9 @@ class SlimRequestHandler implements RequestHandlerInterface
 
     /**
      * @param  ServerRequestInterface $request
-     * @return void
+     * @return App
      */
-    protected function getApp(ServerRequestInterface $request)
+    protected function getApp(ServerRequestInterface $request): App
     {
         if ($this->apps->offsetExists($request)) {
             return $this->apps->offsetGet($request);
@@ -70,10 +72,10 @@ class SlimRequestHandler implements RequestHandlerInterface
     /**
      * Handles a frontend request
      *
-     * @param  ServerRequestInterface                   $request
-     * @return NULL|\Psr\Http\Message\ResponseInterface
+     * @param  ServerRequestInterface $request
+     * @return ResponseInterface
      */
-    public function handleRequest(ServerRequestInterface $request)
+    public function handleRequest(ServerRequestInterface $request): ResponseInterface
     {
         return $this->getApp($request)->run(true);
     }
@@ -85,7 +87,7 @@ class SlimRequestHandler implements RequestHandlerInterface
      * @param  ServerRequestInterface $request
      * @return bool                   If the slim app has a matching route, TRUE otherwise FALSE
      */
-    public function canHandleRequest(ServerRequestInterface $request)
+    public function canHandleRequest(ServerRequestInterface $request): bool
     {
         return $this->getApp($request)->canHandleRequest();
     }
@@ -96,7 +98,7 @@ class SlimRequestHandler implements RequestHandlerInterface
      *
      * @return int The priority of the request handler.
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return 75;
     }

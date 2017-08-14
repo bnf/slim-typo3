@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Bnf\SlimTypo3;
 
 use FastRoute\Dispatcher;
@@ -23,10 +24,9 @@ class App extends \Slim\App
     protected $preProcessedRequest = null;
 
     /**
-     * @param  ServerRequestInterface $request
-     * @return bool                   If the request is not an eID request, TRUE otherwise FALSE
+     * @return bool If a route matches the request, TRUE otherwise FALSE
      */
-    public function canHandleRequest()
+    public function canHandleRequest(): bool
     {
         $router = $this->getContainer()->get('router');
         $request = $this->getContainer()->get('request');
@@ -59,7 +59,7 @@ class App extends \Slim\App
      * @throws MethodNotAllowedException
      * @throws NotFoundException
      */
-    public function process(ServerRequestInterface $request, ResponseInterface $response)
+    public function process(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
         if ($this->preProcessedRequest !== null) {
             $request = $this->preProcessedRequest;

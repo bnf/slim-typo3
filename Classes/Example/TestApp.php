@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Bnf\SlimTypo3\Example;
 
 use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
@@ -42,9 +43,7 @@ class TestApp implements ConfigureAppHookInterface
         //});
     }
 
-    /**
-     */
-    public function bar(Request $request, Response $response)
+    public function bar(Request $request, Response $response): Response
     {
         $response->getBody()->write('baz');
 
