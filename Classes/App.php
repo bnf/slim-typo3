@@ -16,12 +16,22 @@ use Slim\Interfaces\RouterInterface;
 class App extends \Slim\App
 {
     /**
-     * @TODO: move into a SplObjectStorage? That way we ensure the process()
-     * overlay doesn't look so ugly (ignoring the $request parameter)
+     * Cache for preprocessed (dispatched) requests
      *
-     * @var ServerRequestInterface
+     * @var \SplObjectStorage
      */
-    protected $preProcessedRequest = null;
+    protected $requests = null;
+
+    /**
+     * Create new application
+     *
+     * @param array $settings
+     */
+    public function __construct(array $settings = [])
+    {
+        parent::__construct($settings);
+        $this->requests = new \SplObjectStorage;
+    }
 
     /**
      * @return bool If a route matches the request, TRUE otherwise FALSE
@@ -31,16 +41,15 @@ class App extends \Slim\App
         $router = $this->getContainer()->get('router');
         $request = $this->getContainer()->get('request');
 
-        $request = $this->dispatchRouterAndPrepareRoute($request, $router);
-        $routeInfo = $request->getAttribute('routeInfo');
+        $processedRequest = $this->dispatchRouterAndPrepareRoute($request, $router);
+        $routeInfo = $processedRequest->getAttribute('routeInfo');
 
         switch ($routeInfo[RouterInterface::DISPATCH_STATUS]) {
         case Dispatcher::NOT_FOUND:
             return false;
         }
 
-        /* @TODO: Can we simply do $container['request'] = $request; ? */
-        $this->preProcessedRequest = $request;
+        $this->requests->offsetSet($request, $processedRequest);
 
         return true;
     }
@@ -61,8 +70,8 @@ class App extends \Slim\App
      */
     public function process(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
-        if ($this->preProcessedRequest !== null) {
-            $request = $this->preProcessedRequest;
+        if ($this->requests->offsetExists($request)) {
+            $request = $this->requests->offsetGet($request);
         }
 
         return parent::process($request, $response);
