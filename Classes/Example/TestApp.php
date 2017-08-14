@@ -20,7 +20,7 @@ class TestApp implements ConfigureAppHookInterface
      */
     public static function configure(App $app)
     {
-        $app->add(function ($request, $response, $next) {
+        $app->add(function (Request $request, Response $response, callable $next) {
             $response->getBody()->write('I am middleware, adding content before.<br>');
             $response = $next($request, $response, $next);
             $response->getBody()->write('<br>..and now after the content.');
