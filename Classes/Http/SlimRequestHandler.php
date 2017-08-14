@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\RequestHandlerInterface;
+use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -54,6 +55,14 @@ class SlimRequestHandler implements RequestHandlerInterface
 
         $container = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3'];
         $container['request'] = $request;
+        if (!isset($container['response'])) {
+            $container['response'] = function (ContainerInterface $container): Response {
+                $headers = ['Content-Type' => 'text/html; charset=UTF-8'];
+                $response = GeneralUtility::makeInstance(Response::class, 'php://temp', 200, $headers);
+
+                return $response->withProtocolVersion($container->get('settings')['httpVersion']);
+            };
+        }
         $container['callableResolver'] = function (ContainerInterface $container): CallableResolver {
             return GeneralUtility::makeInstance(CallableResolver::class, $container);
         };
