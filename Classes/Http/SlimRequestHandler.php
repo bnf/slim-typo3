@@ -3,7 +3,9 @@ declare(strict_types=1);
 namespace Bnf\SlimTypo3\Http;
 
 use Bnf\SlimTypo3\App;
+use Bnf\SlimTypo3\CallableResolver;
 use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
@@ -52,6 +54,9 @@ class SlimRequestHandler implements RequestHandlerInterface
 
         $container = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3'];
         $container['request'] = $request;
+        $container['callableResolver'] = function (ContainerInterface $container): CallableResolver {
+            return GeneralUtility::makeInstance(CallableResolver::class, $container);
+        };
 
         $app = GeneralUtility::makeInstance(App::class, $container);
 

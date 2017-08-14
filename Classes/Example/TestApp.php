@@ -32,8 +32,10 @@ class TestApp implements ConfigureAppHookInterface
         $app->get('/bar/', static::class . ':bar');
         $app->get('/bar[/{foo}]', static::class . ':bar');
 
+        /* Api Example */
         $app->group('/api', function () {
-            $this->get('/foo', 'Bnf\\SlimTypo3\\Example\\TestApp:bar');
+            /* TYPO3 callable syntax using '->' */
+            $this->get('/foo', 'Bnf\\SlimTypo3\\Example\\TestApp->bar');
 
             /* Catchall rule to ensure all requests to /api* are handling by this App */
             $this->any('{catchall:.*}', function (Request $request, Response $response): Response {
