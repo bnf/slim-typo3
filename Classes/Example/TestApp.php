@@ -32,6 +32,15 @@ class TestApp implements ConfigureAppHookInterface
         $app->get('/bar/', static::class . ':bar');
         $app->get('/bar[/{foo}]', static::class . ':bar');
 
+        $app->group('/api', function () {
+            $this->get('/foo', 'Bnf\\SlimTypo3\\Example\\TestApp:bar');
+
+            /* Catchall rule to ensure all requests to /api* are handling by this App */
+            $this->any('{catchall:.*}', function (Request $request, Response $response): Response {
+                return $response->withStatus(404);
+            });
+        });
+
         // You can even add backend routes. HEADS UP! this performs no authentication/authorization.
         $app->get('/typo3/foo[/{foo}]', static::class . ':bar');
 
