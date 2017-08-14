@@ -82,3 +82,41 @@ App1: /api
 App2: /api2
 App3: /getFooData.xml
 ```
+
+
+Suggestions
+-----------
+
+For this TYPO3 integration we suggest to add middleware's as string.
+That has a slight overhead as Slim's `CallableResolver` will preg_match
+the string, but has the advantage, that not all middleware's
+need to be instantiated although they may never be called (as no route matches
+and we do not process the request). As TYPO3 is the host
+it's likely that most of the times the TYPO3 RequestHandlers will be executed
+therefore the slim bootstrap should be as lightweight as possible.
+
+You can supply middleware's as class (or container identifier) strings
+and Slim's `CallableResolver` will retrieve the instance
+from the container (if the container has a definition for that class)
+or instantiate a new class: `new $class($container);`
+
+Therefore use:
+
+```php
+// Will implicitly call `new \Your\Namespace\Middleware\Foo($container)`
+// when the middleware is executed.
+$app->add(\Your\Namespace\Middleware\Foo::class);
+// or ('view' needs to be defined in the container)
+$app->add('view');
+```
+
+instead of:
+
+```php
+// You SHOULD NOT do this
+$app->add(new \Your\Namespace\Middleware\Foo::class);
+// nor this
+$app->add($container->get(\Your\Namespace\Middleware\Foo::class));
+// nor this
+$app->add($container->get('view'));
+```
