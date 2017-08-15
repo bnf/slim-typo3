@@ -4,7 +4,6 @@ namespace Bnf\SlimTypo3\Http;
 
 use Bnf\SlimTypo3\App;
 use Bnf\SlimTypo3\CallableResolver;
-use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -72,18 +71,6 @@ class SlimRequestHandler implements RequestHandlerInterface
         foreach (App::getRegistrations() as $callable) {
             $callable = $app->getContainer()->get('callableResolver')->resolve($callable);
             call_user_func($callable, $app);
-        }
-
-        /**
-         * @TODO: Remove this hook?
-         */
-        if (isset($container['configureApp']) && is_array($container['configureApp'])) {
-            foreach ($container['configureApp'] as $classRef) {
-                if (!class_exists($classRef) || !in_array(ConfigureAppHookInterface::class, class_implements($classRef))) {
-                    throw new \UnexpectedValueException($classRef . ' must implement interface ' . ConfigureAppHookInterface::class, 1502655884);
-                }
-                call_user_func($classRef . '::configure', $app);
-            }
         }
 
         $this->apps->offsetSet($request, $app);
