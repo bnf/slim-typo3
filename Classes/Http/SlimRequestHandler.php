@@ -8,6 +8,7 @@ use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Interfaces\CallableResolverInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\RequestHandlerInterface;
 use TYPO3\CMS\Core\Http\Response;
@@ -53,20 +54,7 @@ class SlimRequestHandler implements RequestHandlerInterface
             return $this->apps->offsetGet($request);
         }
 
-        $container = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3'];
-        $container['request'] = $request;
-        if (!isset($container['response'])) {
-            $container['response'] = function (ContainerInterface $container): Response {
-                $headers = ['Content-Type' => 'text/html; charset=UTF-8'];
-                $response = GeneralUtility::makeInstance(Response::class, 'php://temp', 200, $headers);
-
-                return $response->withProtocolVersion($container->get('settings')['httpVersion']);
-            };
-        }
-        $container['callableResolver'] = function (ContainerInterface $container): CallableResolver {
-            return GeneralUtility::makeInstance(CallableResolver::class, $container);
-        };
-
+        $container = $this->prepareContainer($request);
         $app = GeneralUtility::makeInstance(App::class, $container);
 
         if (isset($container['configureApp']) && is_array($container['configureApp'])) {
@@ -81,6 +69,55 @@ class SlimRequestHandler implements RequestHandlerInterface
         $this->apps->offsetSet($request, $app);
 
         return $app;
+    }
+
+    /**
+     * @param  ServerRequestInterface $request
+     * @return array
+     */
+    protected function prepareContainer(ServerRequestInterface $request)
+    {
+        $container = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3'];
+
+        /**
+         * Add the $request that we retrieve from \TYPO3\CMS\Core\Core\Bootstrap
+         * to the container. This will instruct \Slim\App to use this request
+         * when parsing routes
+         *
+         * @var ServerRequestInterface
+         */
+        $container['request'] = $request;
+
+        if (!isset($container['response'])) {
+            /**
+             * PSR-7 Response object
+             *
+             * @param Container $container
+             *
+             * @return ResponseInterface
+             */
+            $container['response'] = function (ContainerInterface $container): ResponseInterface {
+                $headers = ['Content-Type' => 'text/html; charset=UTF-8'];
+                $response = GeneralUtility::makeInstance(Response::class, 'php://temp', 200, $headers);
+
+                return $response->withProtocolVersion($container->get('settings')['httpVersion']);
+            };
+        }
+
+        if (!isset($container['callableResolver'])) {
+            /**
+             * Instance of \Slim\Interfaces\CallableResolverInterface
+             *
+             * @param ContainerInterface $container
+             *
+             * @return CallableResolverInterface
+             */
+            $container['callableResolver'] = function (ContainerInterface $container): CallableResolverInterface {
+                return GeneralUtility::makeInstance(CallableResolver::class, $container);
+            };
+        }
+
+        return $container;
     }
 
     /**
