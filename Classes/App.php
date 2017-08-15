@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace Bnf\SlimTypo3;
 
 use FastRoute\Dispatcher;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\RouterInterface;
 
@@ -16,11 +15,11 @@ use Slim\Interfaces\RouterInterface;
 class App extends \Slim\App
 {
     /**
-     * Cache for preprocessed (dispatched) requests
+     * Cache for dispatched (preprocessed) requests
      *
      * @var \SplObjectStorage
      */
-    protected $requests = null;
+    protected $dispatchedRequests;
 
     /**
      * Create new application
@@ -30,7 +29,7 @@ class App extends \Slim\App
     public function __construct(array $settings = [])
     {
         parent::__construct($settings);
-        $this->requests = new \SplObjectStorage;
+        $this->dispatchedRequests = new \SplObjectStorage;
     }
 
     /**
@@ -41,39 +40,36 @@ class App extends \Slim\App
         $router = $this->getContainer()->get('router');
         $request = $this->getContainer()->get('request');
 
-        $processedRequest = $this->dispatchRouterAndPrepareRoute($request, $router);
-        $routeInfo = $processedRequest->getAttribute('routeInfo');
+        $request = $this->dispatchRouterAndPrepareRoute($request, $router);
+        $routeInfo = $request->getAttribute('routeInfo');
 
         switch ($routeInfo[RouterInterface::DISPATCH_STATUS]) {
         case Dispatcher::NOT_FOUND:
             return false;
         }
 
-        $this->requests->offsetSet($request, $processedRequest);
-
         return true;
     }
 
     /**
-     * Process a request
+     * Dispatch the router to find the route. Prepare the route for use.
      *
-     * This method traverses the application middleware stack and then returns the
-     * resultant Response object.
+     * Cache the dispatched request as we do not want to re-dispatch
+     * during canHandleRequest() and run().
      *
      * @param  ServerRequestInterface $request
-     * @param  ResponseInterface      $response
-     * @return ResponseInterface
-     *
-     * @throws Exception
-     * @throws MethodNotAllowedException
-     * @throws NotFoundException
+     * @param  RouterInterface        $router
+     * @return ServerRequestInterface
      */
-    public function process(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
+    protected function dispatchRouterAndPrepareRoute(ServerRequestInterface $request, RouterInterface $router): ServerRequestInterface
     {
-        if ($this->requests->offsetExists($request)) {
-            $request = $this->requests->offsetGet($request);
+        if ($this->dispatchedRequests->offsetExists($request)) {
+            return $this->dispatchedRequests->offsetGet($request);
         }
 
-        return parent::process($request, $response);
+        $dispatchedRequest = parent::dispatchRouterAndPrepareRoute($request, $router);
+        $this->dispatchedRequests->offsetSet($request, $dispatchedRequest);
+
+        return $dispatchedRequest;
     }
 }
