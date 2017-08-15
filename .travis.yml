@@ -8,7 +8,9 @@ matrix:
   fast_finish: true
   include:
     - php: 7.1
-      env: TYPO3_VERSION=^8.7
+      env:
+        - TYPO3_VERSION=^8.7
+        - ANALYSIS='true'
     - php: 7.0
       env: TYPO3_VERSION=^8.7
     - php: 7.1
@@ -31,13 +33,9 @@ before_script:
   - composer require typo3/cms="$TYPO3_VERSION"
 
 script:
-  - >
-    echo "Running unit tests";
-    .build/vendor/bin/phpunit --coverage-text --coverage-clover=clover.xml
-
-  - >
-    echo "Running php lint";
-    find . -name \*.php ! -path "./.build/*" -exec php -l {} >/dev/null \;
+  - find . -name \*.php ! -path "./.build/*" -exec php -l {} >/dev/null \;
+  - if [[ "$ANALYSIS" != 'true' ]]; then .build/vendor/bin/phpunit --coverage-text ; fi
+  - if [[ "$ANALYSIS" == 'true' ]]; then .build/vendor/bin/phpunit --coverage-text --coverage-clover clover.xml ; fi
 
 after_success:
-  - travis_retry .build/vendor/bin/coveralls -v
+  - if [[ "$ANALYSIS" == 'true' ]]; then travis_retry .build/vendor/bin/coveralls -v ; fi
