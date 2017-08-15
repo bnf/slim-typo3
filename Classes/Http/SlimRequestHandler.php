@@ -57,6 +57,26 @@ class SlimRequestHandler implements RequestHandlerInterface
         $container = $this->prepareContainer($request);
         $app = GeneralUtility::makeInstance(App::class, $container);
 
+        /**
+         * @TODO: Create separate Apps for every registration?
+         * How likely is it, that multiple extensions want to
+         * modify the same App? Middleware's will probably conflict?
+         */
+        /**
+         * @TODO: Use a stack for the registrations
+         * and thus call them in reverse order?
+         * That'd allow extensions that depend on others
+         * to add outer middlewares (which is probably
+         * the desired thing).
+         */
+        foreach (App::getRegistrations() as $callable) {
+            $callable = $app->getContainer()->get('callableResolver')->resolve($callable);
+            call_user_func($callable, $app);
+        }
+
+        /**
+         * @TODO: Remove this hook?
+         */
         if (isset($container['configureApp']) && is_array($container['configureApp'])) {
             foreach ($container['configureApp'] as $classRef) {
                 if (!class_exists($classRef) || !in_array(ConfigureAppHookInterface::class, class_implements($classRef))) {

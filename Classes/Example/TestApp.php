@@ -2,10 +2,10 @@
 declare(strict_types=1);
 namespace Bnf\SlimTypo3\Example;
 
-use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
+use TYPO3\CMS\Core\SingletonInterface;
 
 /**
  * TestApp
@@ -13,13 +13,13 @@ use Slim\App;
  * @author Benjamin Franzke <bfr@qbus.de>
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class TestApp implements ConfigureAppHookInterface
+class TestApp implements SingletonInterface
 {
     /**
      * @param  App  $app
      * @return void
      */
-    public static function configure(App $app)
+    public function __invoke(App $app)
     {
         $app->add(function (Request $request, Response $response, callable $next) {
             $response->getBody()->write('I am middleware, adding content before.<br>');

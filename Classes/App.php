@@ -22,6 +22,11 @@ class App extends \Slim\App
     protected $dispatchedRequests;
 
     /**
+     * @var array
+     */
+    protected static $registrations = [];
+
+    /**
      * Create new application
      *
      * @param array $settings
@@ -71,5 +76,25 @@ class App extends \Slim\App
         $this->dispatchedRequests->offsetSet($request, $dispatchedRequest);
 
         return $dispatchedRequest;
+    }
+
+    /**
+     * Register a new App
+     *
+     * @param  callable|string $callable
+     * @return void
+     */
+    public static function register($callable)
+    {
+        self::$registrations[] = $callable;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getRegistrations()
+    {
+        /* @TODO: Add a hook to modify registrations? */
+        return self::$registrations;
     }
 }

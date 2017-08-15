@@ -23,9 +23,26 @@ Usage
 composer require bnf/slim-typo3:dev-master
 ```
 
+### Quick Example
+
 ext_localconf.php:
 ```php
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['configureApp'][] = \Your\Namespace\TestApp::class;
+\Bnf\SlimTypo3\App::register(function ($app) {
+    $app->get('/hello/{whom}', function ($request, $response) {
+        $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('whom')));
+        return $response;
+    });
+});
+```
+
+That's all and now your route controller should be executed when requesting `/hello/world`.
+
+
+### Full Example
+
+ext_localconf.php:
+```php
+\Bnf\SlimTypo3\App::register(\Your\Namespace\TestApp::class);
 ```
 
 TestApp.php
@@ -34,14 +51,14 @@ TestApp.php
 declare(strict_types=1);
 namespace Your\Namespace;
 
-use Bnf\SlimTypo3\Hook\ConfigureAppHookInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
+use TYPO3\CMS\Core\SingletonInterface;
 
-class TestApp implements ConfigureAppHookInterface
+class TestApp implements SingletonInterface
 {
-    public static function configure(App $app)
+    public function __invoke(App $app)
     {
         $app->add(function (Request $request, Response $response, callable $next) {
             $response->getBody()->write('I am middleware.. ');
