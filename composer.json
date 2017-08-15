@@ -27,5 +27,10 @@
     "replace": {
         "slim_typo3": "self.version",
         "typo3-ter/slim_typo3": "self.version"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
     }
 }

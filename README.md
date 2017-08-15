@@ -83,6 +83,10 @@ class TestApp implements SingletonInterface
 
 ```
 
+### Example Extension
+
+See https://github.com/bnf/slim-typo3-testapp for an example extension.
+
 TODO
 ----
 
