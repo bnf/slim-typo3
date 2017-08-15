@@ -25,6 +25,7 @@ cache:
     - $HOME/.composer/cache
 
 before_install:
+  - if [[ "$ANALYSIS" != 'true' ]]; then if php -i | grep -q xdebug; then phpenv config-rm xdebug.ini; fi; fi
   - composer self-update
   - composer --version
 
@@ -34,7 +35,7 @@ before_script:
 
 script:
   - find . -name \*.php ! -path "./.build/*" -exec php -l {} >/dev/null \;
-  - if [[ "$ANALYSIS" != 'true' ]]; then .build/vendor/bin/phpunit --coverage-text ; fi
+  - if [[ "$ANALYSIS" != 'true' ]]; then .build/vendor/bin/phpunit ; fi
   - if [[ "$ANALYSIS" == 'true' ]]; then .build/vendor/bin/phpunit --coverage-text --coverage-clover clover.xml ; fi
 
 after_success:
