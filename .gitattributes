@@ -5,3 +5,4 @@
 /.php_cs export-ignore
 /.editorconfig export-ignore
 /Makefile export-ignore
+/phpunit.xml.dist export-ignore
