@@ -1,2 +1,5 @@
 /.build/
 /composer.lock
+
+/clover.xml
+/coveralls-upload.json

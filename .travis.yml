@@ -22,8 +22,11 @@ before_script:
 script:
   - >
     echo "Running unit tests";
-    .build/vendor/bin/phpunit --coverage-text
+    .build/vendor/bin/phpunit --coverage-text --coverage-clover=clover.xml
 
   - >
     echo "Running php lint";
     find . -name \*.php ! -path "./.build/*" -exec php -l {} >/dev/null \;
+
+after_success:
+  - travis_retry .build/vendor/bin/coveralls -v
