@@ -24,13 +24,35 @@
             "Bnf\\SlimTypo3\\": "Classes"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Bnf\\SlimTypo3\\Tests\\": "Tests"
+        }
+    },
     "replace": {
         "slim_typo3": "self.version",
         "typo3-ter/slim_typo3": "self.version"
     },
+    "require-dev": {
+        "typo3/cms": "^8.7",
+        "typo3/testing-framework": "^1.0"
+    },
+    "config": {
+        "vendor-dir": ".build/vendor"
+    },
     "extra": {
+        "typo3/cms": {
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "web-dir": ".build/web"
+        },
         "branch-alias": {
             "dev-master": "0.1.x-dev"
         }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "mkdir -p .build/web/typo3conf/ext/",
+            "[ -L .build/web/typo3conf/ext/slim_typo3 ] || ln -snvf ../../../../. .build/web/typo3conf/ext/slim_typo3"
+        ]
     }
 }

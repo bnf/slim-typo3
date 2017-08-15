@@ -1,6 +1,8 @@
 Slim framework integration for TYPO3
 ====================================
 
+[![Build Status](https://api.travis-ci.org/bnf/slim-typo3.png)](https://travis-ci.org/bnf/slim-typo3)
+
 Introduction
 ------------
 
