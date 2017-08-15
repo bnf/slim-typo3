@@ -33,6 +33,9 @@ class App extends \Slim\App
      */
     public function __construct(array $settings = [])
     {
+        /* Load FastRoute functions in non-composer (classic) mode. */
+        function_exists('FastRoute\\simpleDispatcher') || include __DIR__ . '/../Resources/Private/PHP/nikic/fast-route/src/functions.php';
+
         parent::__construct($settings);
         $this->dispatchedRequests = new \SplObjectStorage;
     }

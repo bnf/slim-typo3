@@ -28,7 +28,7 @@ $ composer require bnf/slim-typo3:~0.1.0
 
 ### Quick Example
 
-ext_localconf.php:
+Register the app definition in ext_localconf.php (or AdditionalConfiguration.php):
 ```php
 \Bnf\SlimTypo3\App::register(function ($app) {
     $app->get('/hello/{name}', function ($request, $response) {

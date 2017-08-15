@@ -24,6 +24,14 @@ $EM_CONF[$_EXTKEY] = array(
     'autoload' => array(
         'psr-4' => array(
             'Bnf\\SlimTypo3\\' => 'Classes',
+
+            'Slim\\' => 'Resources/Private/PHP/slim/slim/Slim',
+            'Psr\\Container\\' => 'Resources/Private/PHP/psr/container/src',
+            'Interop\\Container\\' => 'Resources/Private/PHP/container-interop/container-interop/src/Interop/Container',
+            'FastRoute\\' => 'Resources/Private/PHP/nikic/fast-route/src',
+        ),
+        'classmap' => array(
+            'Resources/Private/PHP/pimple/pimple/src/Pimple/'
         ),
     ),
 );
