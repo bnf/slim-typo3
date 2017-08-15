@@ -20,7 +20,7 @@ Usage
 -----
 
 ```sh
-composer require bnf/slim-typo3:dev-master
+$ composer require bnf/slim-typo3:dev-master
 ```
 
 ### Quick Example
@@ -28,8 +28,8 @@ composer require bnf/slim-typo3:dev-master
 ext_localconf.php:
 ```php
 \Bnf\SlimTypo3\App::register(function ($app) {
-    $app->get('/hello/{whom}', function ($request, $response) {
-        $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('whom')));
+    $app->get('/hello/{name}', function ($request, $response) {
+        $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('name')));
         return $response;
     });
 });

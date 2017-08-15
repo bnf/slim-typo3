@@ -22,8 +22,8 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['settings'] = [
 \Bnf\SlimTypo3\App::register(\Bnf\SlimTypo3\Example\TestApp::class);
 
 \Bnf\SlimTypo3\App::register(function (\Slim\App $app) {
-    $app->get('/hello/{whom}', function (\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response): \Psr\Http\Message\ResponseInterface {
-        $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('whom')));
+    $app->get('/hello/{name}', function (\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response): \Psr\Http\Message\ResponseInterface {
+        $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('name')));
         return $response;
     });
 });
