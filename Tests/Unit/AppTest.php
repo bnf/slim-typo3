@@ -35,7 +35,7 @@ class AppTest extends UnitTestCase
             return $res;
         });
 
-        $this->assertTrue($app->canHandleRequest($req));
+        $this->assertTrue($app->canHandleRequest());
     }
 
     public function testCanNotHandleRequest()
@@ -48,7 +48,7 @@ class AppTest extends UnitTestCase
             return $res;
         });
 
-        $this->assertFalse($app->canHandleRequest($req));
+        $this->assertFalse($app->canHandleRequest());
     }
 
     public function testDispatchRouterAndPrepareRoute()
