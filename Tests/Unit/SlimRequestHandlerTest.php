@@ -1,16 +1,14 @@
 <?php
 namespace Bnf\SlimTypo3\Tests\Unit;
 
-use Bnf\SlimTypo3\App;
 use Bnf\SlimTypo3\Http\SlimRequestHandler;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
-use Slim\Http\Body;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
 use Slim\Http\RequestBody;
 use Slim\Http\Response;
 use Slim\Http\Uri;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
  * SlimRequestHandler
@@ -47,7 +45,7 @@ class SlimRequestHandlerTest extends UnitTestCase
         $method->setAccessible(true);
         $app = $method->invoke($handler, $req);
 
-        $app->get('/foo', function($req, $res) {
+        $app->get('/foo', function ($req, $res) {
             return $res;
         });
 
@@ -73,7 +71,7 @@ class SlimRequestHandlerTest extends UnitTestCase
         $method->setAccessible(true);
         $app = $method->invoke($handler, $req);
 
-        $app->get('/foo', function($req, $res) use ($response) {
+        $app->get('/foo', function ($req, $res) use ($response) {
             return $response;
         });
         $this->assertSame($response, $handler->handleRequest($req));

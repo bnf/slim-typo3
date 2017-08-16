@@ -31,6 +31,7 @@ class CallableResolverTest extends UnitTestCase
     {
         $test = function () {
             static $called_count = 0;
+
             return $called_count++;
         };
         $resolver = new CallableResolver($this->container);
@@ -45,6 +46,7 @@ class CallableResolverTest extends UnitTestCase
         function testCallable()
         {
             static $called_count = 0;
+
             return $called_count++;
         };
         // @codingStandardsIgnoreEnd
@@ -161,5 +163,4 @@ class CallableResolverTest extends UnitTestCase
         $this->expectExceptionMessage('is not resolvable');
         $resolver->resolve(__LINE__);
     }
-
 }
