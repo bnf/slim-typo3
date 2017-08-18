@@ -31,4 +31,3 @@ class AppRegistryTest extends UnitTestCase
         $this->assertEquals($class, $registry->pop());
     }
 }
-

@@ -2,13 +2,25 @@
 declare(strict_types=1);
 namespace Bnf\SlimTypo3\Http;
 
-use Bnf\SlimTypo3\App;
 use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\CallableResolver;
+use FastRoute\Dispatcher;
+use Pimple\Container as Pimple;
+use Pimple\Psr11\Container as Psr11Container;
+use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\App;
+use Slim\Handlers\Error;
+use Slim\Handlers\NotAllowed;
+use Slim\Handlers\NotFound;
+use Slim\Handlers\PhpError;
+use Slim\Handlers\Strategies\RequestResponse;
+use Slim\Http\Environment;
 use Slim\Interfaces\CallableResolverInterface;
+use Slim\Interfaces\RouterInterface;
+use Slim\Router;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\RequestHandlerInterface;
 use TYPO3\CMS\Core\Http\Response;
@@ -20,7 +32,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @author Benjamin Franzke <bfr@qbus.de>
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SlimRequestHandler implements RequestHandlerInterface
+class SlimRequestHandler implements RequestHandlerInterface, ServiceProviderInterface
 {
     /**
      * Instance of the current TYPO3 bootstrap
@@ -31,7 +43,7 @@ class SlimRequestHandler implements RequestHandlerInterface
     /**
      * @var \SplObjectStorage
      */
-    protected $apps;
+    protected $containers;
 
     /**
      * Constructor handing over the bootstrap
@@ -41,84 +53,103 @@ class SlimRequestHandler implements RequestHandlerInterface
     public function __construct(Bootstrap $bootstrap)
     {
         $this->bootstrap = $bootstrap;
-        $this->apps = new \SplObjectStorage;
+        $this->containers = GeneralUtility::makeInstance(\SplObjectStorage::class);
+
+        /* Load FastRoute functions in non-composer (classic) mode. */
+        function_exists('FastRoute\\simpleDispatcher') || include __DIR__ . '/../../Resources/Private/PHP/nikic/fast-route/src/functions.php';
     }
 
     /**
      * @param  ServerRequestInterface $request
-     * @return App
+     * @return ContainerInterface
      */
-    protected function getApp(ServerRequestInterface $request): App
+    protected function getContainer(ServerRequestInterface $request): ContainerInterface
     {
-        if ($this->apps->offsetExists($request)) {
-            return $this->apps->offsetGet($request);
+        if ($this->containers->offsetExists($request)) {
+            return $this->containers->offsetGet($request);
         }
 
-        $container = $this->prepareContainer($request);
-        $app = GeneralUtility::makeInstance(App::class, $container);
+        $container = GeneralUtility::makeInstance(Pimple::class)->register($this)->offsetGet('psr11-container');
+        $this->containers->offsetSet($request, $container);
 
-        /**
-         * @TODO: Create separate Apps for every registration?
-         * How likely is it, that multiple extensions want to
-         * modify the same App? Middleware's will probably conflict?
-         */
-        foreach ($this->getAppRegistry() as $callable) {
-            $callable = $app->getContainer()->get('callableResolver')->resolve($callable);
-            call_user_func($callable, $app);
-        }
-
-        $this->apps->offsetSet($request, $app);
-
-        return $app;
+        return $container;
     }
 
     /**
-     * @param  ServerRequestInterface $request
-     * @return array
+     * Method implementing Pimple's ServiceProviderInterface
+     *
+     * Registers containers
+     *
+     * @param Pimple $container
      */
-    protected function prepareContainer(ServerRequestInterface $request)
+    public function register(Pimple $container)
     {
-        $container = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3'];
+        if (!isset($container['pimple'])) {
+            /* Provide access to pimple from the psr11-container wrapper */
+            $container['pimple'] = $container;
+        }
 
-        /**
-         * Add the $request that we retrieve from \TYPO3\CMS\Core\Core\Bootstrap
-         * to the container. This will instruct \Slim\App to use this request
-         * when parsing routes
-         *
-         * @var ServerRequestInterface
-         */
-        $container['request'] = $request;
-
-        if (!isset($container['response'])) {
-            /**
-             * PSR-7 Response object
-             *
-             * @param Container $container
-             *
-             * @return ResponseInterface
-             */
-            $container['response'] = function (ContainerInterface $container): ResponseInterface {
-                $headers = ['Content-Type' => 'text/html; charset=UTF-8'];
-                $response = GeneralUtility::makeInstance(Response::class, 'php://temp', 200, $headers);
-
-                return $response->withProtocolVersion($container->get('settings')['httpVersion']);
-            };
+        if (!isset($container['settings'])) {
+            $container['settings'] = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['settings'];
         }
 
         if (!isset($container['callableResolver'])) {
-            /**
-             * Instance of \Slim\Interfaces\CallableResolverInterface
-             *
-             * @param ContainerInterface $container
-             *
-             * @return CallableResolverInterface
-             */
-            $container['callableResolver'] = function (ContainerInterface $container): CallableResolverInterface {
-                return GeneralUtility::makeInstance(CallableResolver::class, $container);
+            $container['callableResolver'] = function (Pimple $container): CallableResolverInterface {
+                return GeneralUtility::makeInstance(CallableResolver::class, $container['psr11-container']);
             };
         }
 
-        return $container;
+        if (!isset($container['psr11-container'])) {
+            $container['psr11-container'] = function (Pimple $container): ContainerInterface {
+                return GeneralUtility::makeInstance(Psr11Container::class, $container);
+            };
+        }
+
+        if (!isset($container['response'])) {
+            $container['response'] = function (Pimple $container): ResponseInterface {
+                $headers = ['Content-Type' => 'text/html; charset=UTF-8'];
+                $response = GeneralUtility::makeInstance(Response::class, 'php://temp', 200, $headers);
+                $response = $response->withProtocolVersion($container['settings']['httpVersion']);
+
+                return $response;
+            };
+        }
+
+        if (!isset($container['registrations'])) {
+            $container['registrations'] = function (Pimple $container): AppRegistry {
+                return GeneralUtility::makeInstance(AppRegistry::class);
+            };
+        }
+
+        if (!isset($container['app'])) {
+            $container['app'] = function (Pimple $container): App {
+                $container = $container['psr11-container'];
+
+                $app = GeneralUtility::makeInstance(App::class, $container);
+
+                /**
+                 * @TODO: Create separate containers for every registration?
+                 * How likely is it, that multiple extensions want to
+                 * modify the same App? Middleware's will probably conflict?
+                 */
+                foreach ($container->get('registrations') as $callable) {
+                    $callable = $container->get('callableResolver')->resolve($callable);
+                    call_user_func($callable, $app);
+                }
+
+                return $app;
+            };
+        }
+
+        $defaultServices = new \ArrayObject;
+        GeneralUtility::makeInstance(\Slim\DefaultServicesProvider::class)->register($defaultServices);
+        foreach ($defaultServices as $service => $callable) {
+            if (!isset($container[$service])) {
+                $container[$service] = function (Pimple $container) use ($callable) {
+                    return $callable($container['psr11-container']);
+                };
+            }
+        }
     }
 
     /**
@@ -129,7 +160,18 @@ class SlimRequestHandler implements RequestHandlerInterface
      */
     public function handleRequest(ServerRequestInterface $request): ResponseInterface
     {
-        return $this->getApp($request)->run(true);
+        $container = $this->getContainer($request);
+
+        $app = $container->get('app');
+        if ($container->has('preprocessed-request')) {
+            $request = $container->get('preprocessed-request');
+        }
+
+        /* Instruct slim (v3 only) to use our $request */
+        $container->get('pimple')->offsetSet('request', $request);
+
+        /* TODO: Use $app->process() as is v4? */
+        return $app->run(true);
     }
 
     /**
@@ -141,7 +183,50 @@ class SlimRequestHandler implements RequestHandlerInterface
      */
     public function canHandleRequest(ServerRequestInterface $request): bool
     {
-        return $this->getApp($request)->canHandleRequest();
+        $container = $this->getContainer($request);
+
+        /* Create the application, this will implicitly create an instance of \Slim\App
+         * and initialize using the AppRegistry */
+        $container->get('app');
+
+        $router = $container->get('router');
+
+        $preprocessedRequest = $this->performRouting($request, $router);
+        $container->get('pimple')->offsetSet('preprocessed-request', $preprocessedRequest);
+
+        $routeInfo = $preprocessedRequest->getAttribute('routeInfo');
+        switch ($routeInfo[RouterInterface::DISPATCH_STATUS]) {
+        case Dispatcher::NOT_FOUND:
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Copied from the upcoming (4.x) RoutingMiddleware
+     *
+     * @param  ServerRequestInterface $request
+     * @param  RouterInterface        $router
+     * @return ServerRequestInterface
+     */
+    private function performRouting(ServerRequestInterface $request, RouterInterface $router): ServerRequestInterface
+    {
+        $routeInfo = $router->dispatch($request);
+        if ($routeInfo[0] === Dispatcher::FOUND) {
+            $routeArguments = [];
+            foreach ($routeInfo[2] as $k => $v) {
+                $routeArguments[$k] = urldecode($v);
+            }
+            $route = $router->lookupRoute($routeInfo[1]);
+            $route->prepare($request, $routeArguments);
+            // add route to the request's attributes
+            $request = $request->withAttribute('route', $route);
+        }
+        // routeInfo to the request's attributes
+        $routeInfo['request'] = [$request->getMethod(), (string) $request->getUri()];
+
+        return $request->withAttribute('routeInfo', $routeInfo);
     }
 
     /**
@@ -153,13 +238,5 @@ class SlimRequestHandler implements RequestHandlerInterface
     public function getPriority(): int
     {
         return 75;
-    }
-
-    /**
-     * @return AppRegistry
-     */
-    public function getAppRegistry(): AppRegistry
-    {
-        return GeneralUtility::makeInstance(AppRegistry::class);
     }
 }

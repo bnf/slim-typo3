@@ -2,11 +2,8 @@
 namespace Bnf\SlimTypo3\Tests\Unit;
 
 use Bnf\SlimTypo3\App;
-use Slim\Http\Environment;
-use Slim\Http\Headers;
-use Slim\Http\Request;
-use Slim\Http\RequestBody;
-use Slim\Http\Uri;
+use Bnf\SlimTypo3\AppRegistry;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
@@ -21,79 +18,7 @@ class AppTest extends UnitTestCase
     {
         $closure = function () {
         };
-        \Bnf\SlimTypo3\App::register($closure);
-        $this->assertSame($closure, \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Bnf\SlimTypo3\AppRegistry::class)->pop());
-    }
-
-    public function testCanHandleRequest()
-    {
-        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
-
-        $container['request'] = $req;
-        $app = new App($container);
-        $app->get('/foo', function ($req, $res) {
-            return $res;
-        });
-
-        $this->assertTrue($app->canHandleRequest());
-    }
-
-    public function testCanNotHandleRequest()
-    {
-        $req = $this->mockRequest(['REQUEST_URI' => '/']);
-
-        $container['request'] = $req;
-        $app = new App($container);
-        $app->get('/foo', function ($req, $res) {
-            return $res;
-        });
-
-        $this->assertFalse($app->canHandleRequest());
-    }
-
-    public function testDispatchRouterAndPrepareRoute()
-    {
-        $req = $this->mockRequest(['REQUEST_URI' => '/']);
-        $container['request'] = $req;
-
-        $app = new App($container);
-        $method = new \ReflectionMethod(App::class, 'dispatchRouterAndPrepareRoute');
-        $method->setAccessible(true);
-
-        $req = $method->invoke($app, $req, $app->getContainer()->get('router'));
-        $this->assertNotNull($req->getAttribute('routeInfo'));
-    }
-
-    public function testDispatchRouterAndPrepareRouteCachedRequest()
-    {
-        $req = $this->mockRequest(['REQUEST_URI' => '/']);
-        $container['request'] = $req;
-
-        $app = new App($container);
-        $method = new \ReflectionMethod(App::class, 'dispatchRouterAndPrepareRoute');
-        $method->setAccessible(true);
-
-        $req1 = $method->invoke($app, $req, $app->getContainer()->get('router'));
-        $req2 = $method->invoke($app, $req, $app->getContainer()->get('router'));
-        $this->assertSame($req1, $req2);
-    }
-
-    protected function mockRequest($env = [])
-    {
-        $env += [
-            'SCRIPT_NAME' => '/index.php',
-            'REQUEST_URI' => '/',
-            'REQUEST_METHOD' => 'GET',
-        ];
-
-        $env = Environment::mock($env);
-        $uri = Uri::createFromEnvironment($env);
-        $headers = Headers::createFromEnvironment($env);
-        $cookies = [];
-        $serverParams = $env->all();
-        $body = new RequestBody();
-        $req = new Request($env['REQUEST_METHOD'], $uri, $headers, $cookies, $serverParams, $body);
-
-        return $req;
+        App::register($closure);
+        $this->assertSame($closure, GeneralUtility::makeInstance(AppRegistry::class)->pop());
     }
 }

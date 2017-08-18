@@ -17,7 +17,8 @@
     "license": "GPL-2.0+",
     "require": {
         "typo3/cms-core": "^8.7",
-        "slim/slim": "^3.0"
+        "slim/slim": "^3.0",
+        "pimple/pimple": "^3.2"
     },
     "autoload": {
         "psr-4": {
@@ -57,7 +58,7 @@
         ],
         "build-t3x-extension": [
             "rm -rf Resources/Private/PHP && mkdir -p Resources/Private/PHP",
-            "cd Resources/Private/PHP && composer init --require slim/slim:^3.0 -n && composer config vendor-dir . && composer install --no-dev --no-autoloader --ansi && rm -rf composer.json composer.lock composer/",
+            "cd Resources/Private/PHP && composer init --require slim/slim:^3.0 --require pimple/pimple:^3.2 -n && composer config vendor-dir . && composer install --no-dev --no-autoloader --ansi && rm -rf composer.json composer.lock composer/",
             "rm -rf Resources/Private/PHP/psr/http-message/",
             "rm -rf Resources/Private/PHP/pimple/pimple/ext/",
             "find Resources/Private/PHP/ -type d \\( -name Tests -o -name test -o -name tests -o -name docs \\) -exec rm -rf '{}' +",

@@ -3,6 +3,7 @@ namespace Bnf\SlimTypo3\Tests\Unit;
 
 use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\Http\SlimRequestHandler;
+use Slim\App;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
@@ -43,11 +44,39 @@ class SlimRequestHandlerTest extends UnitTestCase
 
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
-        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getApp');
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getContainer');
         $method->setAccessible(true);
-        $app = $method->invoke($handler, $req);
+        $container = $method->invoke($handler, $req);
+        $container->get('pimple')['settings'] = [
+            'displayErrorDetails' => false,
+            'outputBuffering' => false,
+        ];
+        $app = $container->get('app');
 
         $app->get('/foo', function ($req, $res) {
+            return $res;
+        });
+
+        $this->assertTrue($handler->canHandleRequest($req));
+    }
+
+    public function testCanHandleRequestWithRouteArguments()
+    {
+        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
+        $handler = new SlimRequestHandler($bootstrap);
+
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo/baz']);
+
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getContainer');
+        $method->setAccessible(true);
+        $container = $method->invoke($handler, $req);
+        $container->get('pimple')['settings'] = [
+            'displayErrorDetails' => false,
+            'outputBuffering' => false,
+        ];
+        $app = $container->get('app');
+
+        $app->get('/foo/{bar}', function ($req, $res) {
             return $res;
         });
 
@@ -69,13 +98,49 @@ class SlimRequestHandlerTest extends UnitTestCase
         $headers->set('Content-Length', '0');
         $response = new Response(200, $headers);
 
-        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getApp');
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getContainer');
         $method->setAccessible(true);
-        $app = $method->invoke($handler, $req);
+        $container = $method->invoke($handler, $req);
+        $container->get('pimple')['settings'] = [
+            'displayErrorDetails' => false,
+            'outputBuffering' => false,
+        ];
+        $app = $container->get('app');
 
         $app->get('/foo', function ($req, $res) use ($response) {
             return $response;
         });
+        $this->assertSame($response, $handler->handleRequest($req));
+    }
+
+    /**
+     * @test
+     */
+    public function testCanThenHandleRequest()
+    {
+        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
+        $handler = new SlimRequestHandler($bootstrap);
+
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
+
+        /* Empty response that is will not be altered by \Slim\App::finalize */
+        $headers = new Headers();
+        $headers->set('Content-Length', '0');
+        $response = new Response(200, $headers);
+
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getContainer');
+        $method->setAccessible(true);
+        $container = $method->invoke($handler, $req);
+        $container->get('pimple')['settings'] = [
+            'displayErrorDetails' => false,
+            'outputBuffering' => false,
+        ];
+        $app = $container->get('app');
+
+        $app->get('/foo', function ($req, $res) use ($response) {
+            return $response;
+        });
+        $this->assertTrue($handler->canHandleRequest($req));
         $this->assertSame($response, $handler->handleRequest($req));
     }
 
@@ -104,7 +169,7 @@ class SlimRequestHandlerTest extends UnitTestCase
         $handler = new SlimRequestHandler($bootstrap);
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
-        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getApp');
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getContainer');
         $method->setAccessible(true);
 
         $executed = 0;
@@ -114,9 +179,14 @@ class SlimRequestHandlerTest extends UnitTestCase
         $registry = GeneralUtility::makeInstance(AppRegistry::class);
         $registry->push($closure);
 
-        $app = $method->invoke($handler, $req);
+        $container = $method->invoke($handler, $req);
+        $container->get('pimple')['settings'] = [
+            'displayErrorDetails' => false,
+            'outputBuffering' => false,
+        ];
+        $app = $container->get('app');
 
-        $this->assertSame(get_class($app), \Bnf\SlimTypo3\App::class);
+        $this->assertSame(get_class($app), App::class);
         $this->assertSame($closure, $registry->pop());
         $this->assertEquals(1, $executed);
     }
