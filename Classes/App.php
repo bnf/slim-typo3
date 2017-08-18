@@ -5,6 +5,7 @@ namespace Bnf\SlimTypo3;
 use FastRoute\Dispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\RouterInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * App
@@ -20,11 +21,6 @@ class App extends \Slim\App
      * @var \SplObjectStorage
      */
     protected $dispatchedRequests;
-
-    /**
-     * @var array
-     */
-    protected static $registrations = [];
 
     /**
      * Create new application
@@ -86,18 +82,11 @@ class App extends \Slim\App
      *
      * @param  callable|string $callable
      * @return void
+     * @deprecated since 0.2.0, will be removed when leaving 0.x
      */
     public static function register($callable)
     {
-        self::$registrations[] = $callable;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getRegistrations()
-    {
-        /* @TODO: Add a hook to modify registrations? */
-        return self::$registrations;
+        GeneralUtility::deprecationLog(self::class . '::register() is deprecated. Will be supported only for 0.x releases. And removed with the next major versio number.');
+        GeneralUtility::makeInstance(AppRegistry::class)->push($callable);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Bnf\SlimTypo3\Tests\Unit;
 
+use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\Http\SlimRequestHandler;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
@@ -8,6 +9,7 @@ use Slim\Http\Request;
 use Slim\Http\RequestBody;
 use Slim\Http\Response;
 use Slim\Http\Uri;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /**
@@ -94,5 +96,28 @@ class SlimRequestHandlerTest extends UnitTestCase
         $req = new Request($env['REQUEST_METHOD'], $uri, $headers, $cookies, $serverParams, $body);
 
         return $req;
+    }
+
+    public function testGetAppWithRegistry()
+    {
+        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
+        $handler = new SlimRequestHandler($bootstrap);
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
+
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getApp');
+        $method->setAccessible(true);
+
+        $executed = 0;
+        $closure = function ($app) use (&$executed) {
+            ++$executed;
+        };
+        $registry = GeneralUtility::makeInstance(AppRegistry::class);
+        $registry->push($closure);
+
+        $app = $method->invoke($handler, $req);
+
+        $this->assertSame(get_class($app), \Bnf\SlimTypo3\App::class);
+        $this->assertSame($closure, $registry->pop());
+        $this->assertEquals(1, $executed);
     }
 }

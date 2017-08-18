@@ -30,12 +30,13 @@ $ composer require bnf/slim-typo3:~0.1.0
 
 Register the app definition in ext_localconf.php (or AdditionalConfiguration.php):
 ```php
-\Bnf\SlimTypo3\App::register(function ($app) {
-    $app->get('/hello/{name}', function ($request, $response) {
-        $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('name')));
-        return $response;
+\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Bnf\SlimTypo3\AppRegistry::class)
+    ->push(function ($app) {
+        $app->get('/hello/{name}', function ($request, $response) {
+            $response->getBody()->write('Hello ' . htmlspecialchars($request->getAttribute('name')));
+            return $response;
+        });
     });
-});
 ```
 
 That's all and now your route controller should be executed when requesting `/hello/world`.
@@ -44,11 +45,14 @@ That's all and now your route controller should be executed when requesting `/he
 ### Full Example
 
 ext_localconf.php:
+
 ```php
-\Bnf\SlimTypo3\App::register(\Your\Namespace\TestApp::class);
+\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Bnf\SlimTypo3\AppRegistry::class)
+    ->push(\Your\Namespace\TestApp::class);
 ```
 
 TestApp.php
+
 ```php
 <?php
 declare(strict_types=1);

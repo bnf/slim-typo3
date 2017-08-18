@@ -22,7 +22,7 @@ class AppTest extends UnitTestCase
         $closure = function () {
         };
         \Bnf\SlimTypo3\App::register($closure);
-        $this->assertSame($closure, array_pop(\Bnf\SlimTypo3\App::getRegistrations()));
+        $this->assertSame($closure, \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Bnf\SlimTypo3\AppRegistry::class)->pop());
     }
 
     public function testCanHandleRequest()

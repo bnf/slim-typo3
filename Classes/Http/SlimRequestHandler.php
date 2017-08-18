@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Bnf\SlimTypo3\Http;
 
 use Bnf\SlimTypo3\App;
+use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\CallableResolver;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -61,14 +62,7 @@ class SlimRequestHandler implements RequestHandlerInterface
          * How likely is it, that multiple extensions want to
          * modify the same App? Middleware's will probably conflict?
          */
-        /**
-         * @TODO: Use a stack for the registrations
-         * and thus call them in reverse order?
-         * That'd allow extensions that depend on others
-         * to add outer middlewares (which is probably
-         * the desired thing).
-         */
-        foreach (App::getRegistrations() as $callable) {
+        foreach ($this->getAppRegistry() as $callable) {
             $callable = $app->getContainer()->get('callableResolver')->resolve($callable);
             call_user_func($callable, $app);
         }
@@ -159,5 +153,13 @@ class SlimRequestHandler implements RequestHandlerInterface
     public function getPriority(): int
     {
         return 75;
+    }
+
+    /**
+     * @return AppRegistry
+     */
+    public function getAppRegistry(): AppRegistry
+    {
+        return GeneralUtility::makeInstance(AppRegistry::class);
     }
 }
