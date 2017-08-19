@@ -10,7 +10,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @author Benjamin Franzke <bfr@qbus.de>
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class App extends \Slim\App
+class App
 {
     /**
      * Register a new App
