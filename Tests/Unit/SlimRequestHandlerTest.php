@@ -190,4 +190,25 @@ class SlimRequestHandlerTest extends UnitTestCase
         $this->assertSame($closure, $registry->pop());
         $this->assertEquals(1, $executed);
     }
+
+    public function testContainer()
+    {
+        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
+        $handler = new SlimRequestHandler($bootstrap);
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
+
+        $method = new \ReflectionMethod(SlimRequestHandler::class, 'getContainer');
+        $method->setAccessible(true);
+
+        $container = $method->invoke($handler, $req);
+        $container->get('pimple')['settings'] = [
+            'displayErrorDetails' => false,
+            'outputBuffering' => false,
+        ];
+
+        $this->assertSame(\Slim\Handlers\Error::class, get_class($container->get('errorHandler')));
+        $this->assertSame(\Slim\Handlers\PhpError::class, get_class($container->get('phpErrorHandler')));
+        $this->assertSame(\Slim\Handlers\NotFound::class, get_class($container->get('notFoundHandler')));
+        $this->assertSame(\Slim\Handlers\NotAllowed::class, get_class($container->get('notAllowedHandler')));
+    }
 }
