@@ -48,7 +48,7 @@
             "web-dir": ".build/web"
         },
         "branch-alias": {
-            "dev-master": "0.1.x-dev"
+            "dev-master": "0.3.x-dev"
         }
     },
     "scripts": {
