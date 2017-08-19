@@ -1,7 +1,7 @@
 {
     "name": "bnf/slim-typo3",
     "type": "typo3-cms-extension",
-    "description": "Slim framework integration for TYPO3",
+    "description": "Slim Framework integration for TYPO3",
     "keywords": [
         "TYPO3",
         "extension"

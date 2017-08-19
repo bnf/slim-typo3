@@ -1,7 +1,7 @@
 <?php
 
 $EM_CONF[$_EXTKEY] = array(
-    'title' => 'Slim framework integration for TYPO3',
+    'title' => 'Slim Framework integration',
     'description' => 'Integrates the Slim microframework. Providing a PSR-7 based router and middleware in front of TYPO3 (executed when a route matches)',
     'category' => '',
     'author' => 'Benjamin Franzke',
