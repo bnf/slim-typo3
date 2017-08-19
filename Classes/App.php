@@ -22,6 +22,6 @@ class App
     public static function register($callable)
     {
         GeneralUtility::deprecationLog(self::class . '::register() is deprecated. Will be supported only for 0.x releases. And removed with the next major versio number.');
-        GeneralUtility::makeInstance(AppRegistry::class)->push($callable);
+        GeneralUtility::makeInstance(AppRegistry::class)->unshift($callable);
     }
 }
