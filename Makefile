@@ -12,3 +12,8 @@ test-coverage: .build/vendor/autoload.php
 
 lint:
 	find . -name '*.php' '!' -path './.build/*' -exec php -l {} >/dev/null \;
+
+prepare-classic-extension: Resources/Private/PHP/composer/installed.json
+
+Resources/Private/PHP/composer/installed.json: composer.json
+	composer prepare-classic-extension
