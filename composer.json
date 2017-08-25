@@ -55,22 +55,6 @@
         "post-autoload-dump": [
             "mkdir -p .build/web/typo3conf/ext/",
             "[ -L .build/web/typo3conf/ext/slim_typo3 ] || ln -snvf ../../../../. .build/web/typo3conf/ext/slim_typo3"
-        ],
-        "prepare-classic-extension": [
-            "rm -rf Resources/Private/PHP && mkdir -p Resources/Private/PHP",
-            "cd Resources/Private/PHP && composer init --require slim/slim:^3.0 --require pimple/pimple:^3.2 -n && composer config vendor-dir . && composer install --no-dev --no-autoloader --ansi && rm -rf composer.json composer.lock",
-            "rm -rf Resources/Private/PHP/psr/http-message/",
-            "rm -rf Resources/Private/PHP/pimple/pimple/ext/",
-            "find Resources/Private/PHP/ -type d \\( -name Tests -o -name test -o -name tests -o -name docs \\) -exec rm -rf '{}' +",
-            "find Resources/Private/PHP/ -type f \\( -name README.md -o -name README.rst -o -name CHANGELOG -o -name composer.json -o -name phpunit.xml.dist -o -name .gitignore -o -name .travis.yml \\) -exec rm -f '{}' +"
-        ],
-        "build-t3x-extension": [
-            "@prepare-classic-extension",
-            "rm -rf Resources/Private/PHP/composer/",
-            "rm -f \"${PWD##*/}_`git describe --tags`.zip\"",
-            "sh -c 'git archive -o \"${PWD##*/}_`git describe --tags`.zip\" HEAD'",
-            "sh -c 'zip -r -g \"${PWD##*/}_`git describe --tags`.zip\" Resources/Private/PHP/'",
-            "rm -rf Resources/Private/PHP"
         ]
     }
 }

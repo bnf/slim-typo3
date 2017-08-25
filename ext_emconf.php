@@ -29,6 +29,7 @@ $EM_CONF[$_EXTKEY] = array(
             'Psr\\Container\\' => 'Resources/Private/PHP/psr/container/src',
             'Interop\\Container\\' => 'Resources/Private/PHP/container-interop/container-interop/src/Interop/Container',
             'FastRoute\\' => 'Resources/Private/PHP/nikic/fast-route/src',
+            'Bnf\\Typo3Middleware\\' => 'Resources/Private/PHP/bfr/typo3-middleware/src',
         ),
         'classmap' => array(
             'Resources/Private/PHP/pimple/pimple/src/Pimple/'
