@@ -52,9 +52,6 @@
         }
     },
     "scripts": {
-        "post-autoload-dump": [
-            "mkdir -p .build/web/typo3conf/ext/",
-            "[ -L .build/web/typo3conf/ext/slim_typo3 ] || ln -snvf ../../../../. .build/web/typo3conf/ext/slim_typo3"
-        ]
+        "post-autoload-dump": "mkdir -p .build/web/typo3conf/ext/ && ln -snf ../../../.. .build/web/typo3conf/ext/slim_typo3"
     }
 }
