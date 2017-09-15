@@ -37,7 +37,7 @@
     "require-dev": {
         "typo3/cms": "^8.7",
         "typo3/testing-framework": "^1.0",
-        "satooshi/php-coveralls": "~1.0"
+        "php-coveralls/php-coveralls": "^1.0"
     },
     "config": {
         "vendor-dir": ".build/vendor"
