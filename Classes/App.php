@@ -21,7 +21,9 @@ class App
      */
     public static function register($callable)
     {
-        GeneralUtility::deprecationLog(self::class . '::register() is deprecated. Will be supported only for 0.x releases. And removed with the next major versio number.');
         GeneralUtility::makeInstance(AppRegistry::class)->unshift($callable);
+
+        $msg = self::class . '::register() is deprecated. Will be supported only for 0.x releases and removed with the next major version number.';
+        version_compare(TYPO3_branch, '9.0', '>=') ? trigger_error($msg, E_USER_DEPRECATED) : GeneralUtility::deprecationLog($msg);
     }
 }

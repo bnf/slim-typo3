@@ -16,7 +16,7 @@
     ],
     "license": "GPL-2.0+",
     "require": {
-        "typo3/cms-core": "^8.7",
+        "typo3/cms-core": "^8.7 || ~9.0.0",
         "slim/slim": "^3.0",
         "pimple/pimple": "^3.2"
     },
@@ -35,8 +35,7 @@
         "typo3-ter/slim_typo3": "self.version"
     },
     "require-dev": {
-        "typo3/cms": "^8.7",
-        "typo3/testing-framework": "^1.0",
+        "typo3/testing-framework": "^2.0",
         "php-coveralls/php-coveralls": "^1.0"
     },
     "config": {

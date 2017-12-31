@@ -9,16 +9,12 @@ matrix:
   include:
     - php: 7.1
       env:
-        - TYPO3_VERSION=^8.7
+        - TYPO3_VERSION=typo3/cms:^8.7
         - ANALYSIS='true'
     - php: 7.0
-      env: TYPO3_VERSION=^8.7
-    - php: 7.1
-      env: TYPO3_VERSION="dev-master as 8.7.4"
-    - php: 7.0
-      env: TYPO3_VERSION="dev-master as 8.7.4"
-  allow_failures:
-    - env: TYPO3_VERSION="dev-master as 8.7.4"
+      env: TYPO3_VERSION=typo3/cms:^8.7
+    - php: 7.2
+      env: TYPO3_VERSION=typo3/minimal:~9.0.0
 
 cache:
   directories:
@@ -31,7 +27,7 @@ before_install:
 
 before_script:
   - composer install
-  - composer require --dev typo3/cms:"$TYPO3_VERSION"
+  - composer require --dev "$TYPO3_VERSION"
 
 script:
   - find . -name \*.php ! -path "./.build/*" -exec php -l {} >/dev/null \;

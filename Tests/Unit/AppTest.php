@@ -18,7 +18,11 @@ class AppTest extends UnitTestCase
     {
         $closure = function () {
         };
+
+        $old = set_error_handler(function() {});
         App::register($closure);
+        set_error_handler($old);
+
         $this->assertSame($closure, GeneralUtility::makeInstance(AppRegistry::class)->pop());
     }
 }
