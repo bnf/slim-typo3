@@ -3,10 +3,12 @@ if (!defined('TYPO3_MODE')) {
     die('Access denied.');
 }
 
-if (TYPO3_REQUESTTYPE & (TYPO3_REQUESTTYPE_FE | TYPO3_REQUESTTYPE_BE | TYPO3_REQUESTTYPE_AJAX)) {
-    \TYPO3\CMS\Core\Core\Bootstrap::getInstance()->registerRequestHandlerImplementation(
-        \Bnf\SlimTypo3\Http\SlimRequestHandler::class
-    );
+if (version_compare(TYPO3_version, '9.4', '<')) {
+    if (TYPO3_REQUESTTYPE & (TYPO3_REQUESTTYPE_FE | TYPO3_REQUESTTYPE_BE | TYPO3_REQUESTTYPE_AJAX)) {
+        \TYPO3\CMS\Core\Core\Bootstrap::getInstance()->registerRequestHandlerImplementation(
+            \Bnf\SlimTypo3\Http\SlimRequestHandler::class
+        );
+    }
 }
 
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['settings'] = [

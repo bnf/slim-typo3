@@ -16,10 +16,12 @@ class AppTest extends UnitTestCase
 {
     public function testRegisterStoresClosure()
     {
+        $this->resetSingletonInstances = true;
         $closure = function () {
         };
 
-        $old = set_error_handler(function() {});
+        $old = set_error_handler(function () {
+        });
         App::register($closure);
         set_error_handler($old);
 

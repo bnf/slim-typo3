@@ -19,8 +19,8 @@ prepare-classic-extension:
 	mkdir -p Resources/Private/PHP
 	cd Resources/Private/PHP && composer init -n
 	cd Resources/Private/PHP && composer config vendor-dir .
-	sed -i 's#    "config":#    "replace": { "typo3/cms-core": "*", "typo3/cms-frontend": "*", "typo3/cms-extbase": "*", "psr/http-message": "*" },\n&#' Resources/Private/PHP/composer.json
-	cd Resources/Private/PHP && composer require slim/slim:^3.0 pimple/pimple:^3.2 bnf/typo3-middleware:~0.1.0
+	sed -i 's#    "config":#    "replace": { "typo3/cms-core": "*", "typo3/cms-frontend": "*", "typo3/cms-extbase": "*", "psr/http-message": "*", "psr/container": "*" },\n&#' Resources/Private/PHP/composer.json
+	cd Resources/Private/PHP && composer require slim/slim:^3.0 pimple/pimple:^3.2 bnf/typo3-middleware:~0.2.0
 	cd Resources/Private/PHP && composer install --no-dev --no-autoloader --ansi && rm -rf composer.json composer.lock
 	rm -rf Resources/Private/PHP/pimple/pimple/ext/
 	find Resources/Private/PHP/ -type d \( -name Tests -o -name test -o -name tests -o -name docs \) -exec rm -rf '{}' +

@@ -14,7 +14,7 @@ $EM_CONF[$_EXTKEY] = array(
     'version' => '0.2.2',
     'constraints' => array(
         'depends' => array(
-            'typo3' => '8.7.0-9.0.99',
+            'typo3' => '9.5.0-9.5.99',
         ),
         'conflicts' => array(
         ),
@@ -26,8 +26,6 @@ $EM_CONF[$_EXTKEY] = array(
             'Bnf\\SlimTypo3\\' => 'Classes',
 
             'Slim\\' => 'Resources/Private/PHP/slim/slim/Slim',
-            'Psr\\Container\\' => 'Resources/Private/PHP/psr/container/src',
-            'Interop\\Container\\' => 'Resources/Private/PHP/container-interop/container-interop/src/Interop/Container',
             'FastRoute\\' => 'Resources/Private/PHP/nikic/fast-route/src',
             'Bnf\\Typo3Middleware\\' => 'Resources/Private/PHP/bnf/typo3-middleware/src',
         ),

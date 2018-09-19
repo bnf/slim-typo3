@@ -11,42 +11,32 @@ use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Slim\App;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\RouterInterface;
 use Slim\Router;
-use TYPO3\CMS\Core\Core\Bootstrap;
-use TYPO3\CMS\Core\Http\RequestHandlerInterface;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * SlimRequestHandler for TYPO3 v8
+ * SlimRequestHandler for TYPO3 v9
  *
  * @author Benjamin Franzke <bfr@qbus.de>
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SlimRequestHandler implements RequestHandlerInterface, ServiceProviderInterface
+class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, ServiceProviderInterface
 {
-    /**
-     * Instance of the current TYPO3 bootstrap
-     * @var Bootstrap
-     */
-    protected $bootstrap;
-
     /**
      * @var \SplObjectStorage
      */
     protected $containers;
 
     /**
-     * Constructor handing over the bootstrap
-     *
-     * @param Bootstrap $bootstrap
      */
-    public function __construct(Bootstrap $bootstrap)
+    public function __construct()
     {
-        $this->bootstrap = $bootstrap;
         $this->containers = GeneralUtility::makeInstance(\SplObjectStorage::class);
 
         /* Load FastRoute functions in non-composer (classic) mode. */
@@ -146,13 +136,27 @@ class SlimRequestHandler implements RequestHandlerInterface, ServiceProviderInte
         }
     }
 
+    /*
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $nextHandler): ResponseInterface
+    {
+        if ($this->canHandleRequest($request)) {
+            return $this->handle($request);
+        }
+
+        return $nextHandler->handle($request);
+    }
+
     /**
      * Handles a frontend request
      *
      * @param  ServerRequestInterface $request
      * @return ResponseInterface
      */
-    public function handleRequest(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $container = $this->getContainer($request);
 
@@ -175,7 +179,7 @@ class SlimRequestHandler implements RequestHandlerInterface, ServiceProviderInte
      * @param  ServerRequestInterface $request
      * @return bool                   If the slim app has a matching route, TRUE otherwise FALSE
      */
-    public function canHandleRequest(ServerRequestInterface $request): bool
+    protected function canHandleRequest(ServerRequestInterface $request): bool
     {
         $container = $this->getContainer($request);
 
@@ -221,16 +225,5 @@ class SlimRequestHandler implements RequestHandlerInterface, ServiceProviderInte
         $routeInfo['request'] = [$request->getMethod(), (string) $request->getUri()];
 
         return $request->withAttribute('routeInfo', $routeInfo);
-    }
-
-    /**
-     * Returns the priority - how eager the handler is to actually handle the
-     * request.
-     *
-     * @return int The priority of the request handler.
-     */
-    public function getPriority(): int
-    {
-        return 75;
     }
 }
