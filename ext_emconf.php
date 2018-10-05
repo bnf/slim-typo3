@@ -26,6 +26,7 @@ $EM_CONF[$_EXTKEY] = array(
             'Bnf\\SlimTypo3\\' => 'Classes',
 
             'Slim\\' => 'Resources/Private/PHP/slim/slim/Slim',
+            'Bnf\\Slim3Psr15\\' => 'Resources/Private/PHP/bnf/slim3-psr15/src',
             'FastRoute\\' => 'Resources/Private/PHP/nikic/fast-route/src',
             'Bnf\\Typo3Middleware\\' => 'Resources/Private/PHP/bnf/typo3-middleware/src',
         ),

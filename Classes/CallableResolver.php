@@ -1,7 +1,9 @@
 <?php
 namespace Bnf\SlimTypo3;
 
+use Bnf\Slim3Psr15\Adapter\PsrMiddleware;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use RuntimeException;
 use Slim\Interfaces\CallableResolverInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -18,19 +20,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @author Benjamin Franzke <bfr@qbus.de>
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class CallableResolver implements CallableResolverInterface
+final class CallableResolver implements CallableResolverInterface
 {
-    const CALLABLE_PATTERN = '!^([^\-\:]+)(?:\-\>|\:)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
-
     /**
      * @var ContainerInterface
      */
     private $container;
 
     /**
-     * @param ContainerInterface $container
+     * @param ContainerInterface|null $container
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container = null)
     {
         $this->container = $container;
     }
@@ -42,75 +42,61 @@ class CallableResolver implements CallableResolverInterface
      * from the container otherwise instantiate it and then dispatch 'method'.
      *
      * @param mixed $toResolve
+     * @param bool  $resolveMiddleware
      *
      * @return callable
      *
      * @throws RuntimeException if the callable does not exist
      * @throws RuntimeException if the callable is not resolvable
      */
-    public function resolve($toResolve)
+    public function resolve($toResolve, $resolveMiddleware = true)
     {
-        if (is_callable($toResolve)) {
-            return $toResolve;
+        $resolved = $toResolve;
+
+        if ($resolveMiddleware && $toResolve instanceof MiddlewareInterface) {
+            return new PsrMiddleware($toResolve);
         }
 
-        if (!is_string($toResolve)) {
-            $this->assertCallable($toResolve);
+        if (!is_callable($toResolve) && is_string($toResolve)) {
+            $class = $toResolve;
+            $method = null;
+            $instance = null;
+
+            // check for slim callable as "class:method"
+            $callablePattern = '!^([^\:]+)\:([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
+            $callablePattern = '!^([^\-\:]+)(?:\-\>|\:)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
+            if (preg_match($callablePattern, $toResolve, $matches)) {
+                $class = $matches[1];
+                $method = $matches[2];
+            }
+
+            if ($this->container instanceof ContainerInterface && $this->container->has($class)) {
+                $instance = $this->container->get($class);
+            } else {
+                if (!class_exists($class)) {
+                    throw new RuntimeException(sprintf('Callable %s does not exist', $class));
+                }
+                $instance = GeneralUtility::makeInstance($class, $this->container);
+            }
+
+            if ($resolveMiddleware && $method === null && $instance instanceof MiddlewareInterface) {
+                return new PsrMiddleware($instance);
+            }
+
+            $resolved = [$instance, $method ?: '__invoke'];
         }
 
-        // check for slim callable as "class:method" or TYPO3 callable as "class->method"
-        if (preg_match(self::CALLABLE_PATTERN, $toResolve, $matches)) {
-            $resolved = $this->resolveCallable($matches[1], $matches[2]);
-            $this->assertCallable($resolved);
-
-            return $resolved;
-        }
-
-        $resolved = $this->resolveCallable($toResolve);
-        $this->assertCallable($resolved);
-
-        return $resolved;
-    }
-
-    /**
-     * Check if string is something in the DIC
-     * that's callable or is a class name which has an __invoke() method.
-     *
-     * @param  string   $class
-     * @param  string   $method
-     * @return callable
-     *
-     * @throws \RuntimeException if the callable does not exist
-     */
-    protected function resolveCallable($class, $method = '__invoke')
-    {
-        if ($this->container->has($class)) {
-            return [$this->container->get($class), $method];
-        }
-
-        if (!class_exists($class)) {
-            throw new RuntimeException(sprintf('Callable %s does not exist', $class));
-        }
-
-        /* TODO: do we want to support leading backlashes?
-         * Slim supports them with it's default CallableResolver, TYPO3 doesn't. */
-        //$class = ltrim($class, '\\');
-
-        return [GeneralUtility::makeInstance($class, $this->container), $method];
-    }
-
-    /**
-     * @param Callable $callable
-     *
-     * @throws \RuntimeException if the callable is not resolvable
-     */
-    protected function assertCallable($callable)
-    {
-        if (!is_callable($callable)) {
+        if (!is_callable($resolved)) {
             throw new RuntimeException(sprintf(
                 '%s is not resolvable',
-                is_array($callable) || is_object($callable) ? json_encode($callable) : $callable
+                is_array($toResolve) || is_object($toResolve) ? json_encode($toResolve) : $toResolve
             ));
         }
+
+        if ($this->container instanceof ContainerInterface && $resolved instanceof \Closure) {
+            $resolved = $resolved->bindTo($this->container);
+        }
+
+        return $resolved;
     }
 }
