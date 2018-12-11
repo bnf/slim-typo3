@@ -63,7 +63,6 @@ final class CallableResolver implements CallableResolverInterface
             $instance = null;
 
             // check for slim callable as "class:method"
-            $callablePattern = '!^([^\:]+)\:([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
             $callablePattern = '!^([^\-\:]+)(?:\-\>|\:)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
             if (preg_match($callablePattern, $toResolve, $matches)) {
                 $class = $matches[1];
