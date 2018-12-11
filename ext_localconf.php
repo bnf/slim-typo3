@@ -4,7 +4,7 @@ if (!defined('TYPO3_MODE')) {
 }
 
 if (version_compare(TYPO3_version, '9.4', '<')) {
-    if (TYPO3_REQUESTTYPE & (TYPO3_REQUESTTYPE_FE | TYPO3_REQUESTTYPE_BE | TYPO3_REQUESTTYPE_AJAX)) {
+    if (!(TYPO3_REQUESTTYPE & (TYPO3_REQUESTTYPE_CLI | TYPO3_REQUESTTYPE_INSTALL))) {
         \TYPO3\CMS\Core\Core\Bootstrap::getInstance()->registerRequestHandlerImplementation(
             \Bnf\SlimTypo3\Http\SlimRequestHandler::class
         );
