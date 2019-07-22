@@ -63,7 +63,18 @@ class SlimRequestHandler implements RequestHandlerInterface, ServiceProviderInte
             return $this->containers->offsetGet($request);
         }
 
-        $container = GeneralUtility::makeInstance(Pimple::class)->register($this)->offsetGet('psr11-container');
+        $pimple = GeneralUtility::makeInstance(Pimple::class)->register($this);
+        foreach (GeneralUtility::makeInstance(AppRegistry::class) as $possibleServiceProvider) {
+            $instance = $possibleServiceProvider;
+            if (is_string($possibleServiceProvider) && class_exists($possibleServiceProvider)) {
+                $instance = GeneralUtility::makeInstance($possibleServiceProvider);
+            }
+            if ($instance instanceof ServiceProviderInterface) {
+                $pimple->register($instance);
+            }
+        }
+
+        $container = $pimple->offsetGet('psr11-container');
         $this->containers->offsetSet($request, $container);
 
         return $container;
