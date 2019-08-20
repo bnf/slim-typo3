@@ -23,7 +23,7 @@ Usage
 -----
 
 ```sh
-$ composer require bnf/slim-typo3:~0.2.1
+$ composer require bnf/slim-typo3:~0.5.0
 ```
 
 ### Quick Example
