@@ -7,14 +7,12 @@ dist: trusty
 matrix:
   fast_finish: true
   include:
-    - php: 7.2
+    - php: 7.3
       env:
         - TYPO3_VERSION=typo3/cms-core:^9.5
         - ANALYSIS='true'
-    - php: 7.1
-      env: TYPO3_VERSION=typo3/cms-core:^8.7
-    - php: 7.0
-      env: TYPO3_VERSION=typo3/cms-core:^8.7
+    - php: 7.2
+      env: TYPO3_VERSION=typo3/cms-core:^9.5
 
 cache:
   directories:
