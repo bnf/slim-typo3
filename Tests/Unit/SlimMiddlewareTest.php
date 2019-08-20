@@ -3,6 +3,7 @@ namespace Bnf\SlimTypo3\Tests\Unit;
 
 use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\Http\SlimMiddleware;
+use Pimple\ServiceProviderInterface;
 use Prophecy\Argument;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -64,44 +65,36 @@ class SlimMiddlewareTest extends UnitTestCase
 
     public function testCanHandleRequest()
     {
-        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
-
-        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
-
-        $method = new \ReflectionMethod(SlimMiddleware::class, 'getContainer');
-        $method->setAccessible(true);
-        $container = $method->invoke($middleware, $req);
-        $container->get('pimple')['settings'] = [
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['settings'] = [
             'displayErrorDetails' => false,
             'outputBuffering' => false,
         ];
-        $app = $container->get('app');
-
-        $app->get('/foo', function ($req, $res) {
-            return $res->withStatus(201);
+        $appRegistry = new AppRegistry;
+        $appRegistry->push(function (App $app) {
+            $app->get('/foo', function ($req, $res) {
+                return $res->withStatus(201);
+            });
         });
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal(), $appRegistry);
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
         $this->assertEquals(201, $middleware->process($req, $this->requestHandler->reveal())->getStatusCode());
     }
 
     public function testCanHandleRequestWithRouteArguments()
     {
-        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
-
-        $req = $this->mockRequest(['REQUEST_URI' => '/foo/baz']);
-
-        $method = new \ReflectionMethod(SlimMiddleware::class, 'getContainer');
-        $method->setAccessible(true);
-        $container = $method->invoke($middleware, $req);
-        $container->get('pimple')['settings'] = [
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['settings'] = [
             'displayErrorDetails' => false,
             'outputBuffering' => false,
         ];
-        $app = $container->get('app');
-
-        $app->get('/foo/{bar}', function ($req, $res) {
-            return $res->withStatus(201);
+        $appRegistry = new AppRegistry;
+        $appRegistry->push(function (App $app) {
+            $app->get('/foo/{bar}', function ($req, $res) {
+                return $res->withStatus(201);
+            });
         });
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal(), $appRegistry);
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo/baz']);
 
         $this->assertEquals(201, $middleware->process($req, $this->requestHandler->reveal())->getStatusCode());
     }
@@ -111,27 +104,25 @@ class SlimMiddlewareTest extends UnitTestCase
      */
     public function testHandleRequest()
     {
-        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
-
-        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
-
-        /* Empty response that is will not be altered by \Slim\App::finalize */
-        $headers = new Headers();
-        $headers->set('Content-Length', '0');
-        $response = new Response(200, $headers);
-
-        $method = new \ReflectionMethod(SlimMiddleware::class, 'getContainer');
-        $method->setAccessible(true);
-        $container = $method->invoke($middleware, $req);
-        $container->get('pimple')['settings'] = [
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['slim_typo3']['settings'] = [
             'displayErrorDetails' => false,
             'outputBuffering' => false,
         ];
-        $app = $container->get('app');
+        $appRegistry = new AppRegistry;
+        $appRegistry->push(function (App $app) {
+            /* Empty response that is will not be altered by \Slim\App::finalize */
+            $headers = new Headers();
+            $headers->set('Content-Length', '0');
+            $response = new Response(200, $headers);
 
-        $app->get('/foo', function ($req, $res) use ($response) {
-            return $response->withStatus(201);
+            $app->get('/foo', function ($req, $res) use ($response) {
+                return $response->withStatus(201);
+            });
         });
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal(), $appRegistry);
+
+        $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
+
         $this->assertEquals(201, $middleware->process($req, $this->requestHandler->reveal())->getStatusCode());
     }
 
