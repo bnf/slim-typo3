@@ -34,7 +34,7 @@ class SlimMiddlewareTest extends UnitTestCase
      */
     protected $requestHandler;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->responseProphecy = $this->prophesize();
         $this->responseProphecy->willImplement(ResponseInterface::class);

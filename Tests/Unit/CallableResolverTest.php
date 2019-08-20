@@ -20,7 +20,7 @@ class CallableResolverTest extends UnitTestCase
      */
     protected $container;
 
-    public function setUp()
+    public function setUp(): void
     {
         CallableTest::$CalledCount = 0;
         InvokableTest::$CalledCount = 0;
