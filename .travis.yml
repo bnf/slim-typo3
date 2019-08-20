@@ -13,6 +13,10 @@ matrix:
         - ANALYSIS='true'
     - php: 7.2
       env: TYPO3_VERSION=typo3/cms-core:^9.5
+    - php: 7.3
+      env: TYPO3_VERSION=typo3/cms-core:~10.0.0
+    - php: 7.2
+      env: TYPO3_VERSION=typo3/cms-core:~10.0.0
 
 cache:
   directories:

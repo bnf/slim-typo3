@@ -38,7 +38,7 @@
         "typo3-ter/slim_typo3": "self.version"
     },
     "require-dev": {
-        "typo3/testing-framework": "^2.0 || ^4.9",
+        "typo3/testing-framework": "^2.0 || ^4.9 || ^5.0",
         "phpspec/prophecy": "^1.7",
         "php-coveralls/php-coveralls": "^2.0",
         "bnf/typo3-middleware": "~0.3.0"
@@ -48,7 +48,7 @@
     },
     "extra": {
         "typo3/cms": {
-            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "app-dir": ".build",
             "web-dir": ".build/web"
         },
         "branch-alias": {
