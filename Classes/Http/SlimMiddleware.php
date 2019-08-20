@@ -4,9 +4,11 @@ namespace Bnf\SlimTypo3\Http;
 
 use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\CallableResolver;
+use Bnf\SlimTypo3\Container\DelegatingPimple;
+use Bnf\SlimTypo3\Container\MergingContainer;
+use Bnf\SlimTypo3\Container\ObjectManagerAdapter;
 use FastRoute\Dispatcher;
 use Pimple\Container as Pimple;
-use Pimple\Psr11\Container as Psr11Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -27,14 +29,24 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, ServiceProviderInterface
 {
     /**
+     * @var ContainerInterface
+     */
+    protected $rootContainer;
+
+    /**
      * @var \SplObjectStorage
      */
     protected $containers;
 
     /**
      */
-    public function __construct()
+    public function __construct(ContainerInterface $rootContainer = null)
     {
+        $this->rootContainer = $rootContainer ?? new ObjectManagerAdapter(
+            // Fall back to Extbase ObjectManager DependencyInjection for TYPO3 v9
+            GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Object\ObjectManager::class)
+        );
+
         $this->containers = GeneralUtility::makeInstance(\SplObjectStorage::class);
 
         /* Load FastRoute functions in non-composer (classic) mode. */
@@ -51,7 +63,12 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
             return $this->containers->offsetGet($request);
         }
 
-        $pimple = GeneralUtility::makeInstance(Pimple::class)->register($this);
+        $container = new MergingContainer;
+        $pimple = GeneralUtility::makeInstance(DelegatingPimple::class, ['psr11-container' => $container], $container);
+        $container->add($pimple);
+        $container->add($this->rootContainer);
+
+        $pimple->register($this);
         foreach (GeneralUtility::makeInstance(AppRegistry::class) as $possibleServiceProvider) {
             $instance = $possibleServiceProvider;
             if (is_string($possibleServiceProvider) && class_exists($possibleServiceProvider)) {
@@ -62,7 +79,6 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
             }
         }
 
-        $container = $pimple->offsetGet('psr11-container');
         $this->containers->offsetSet($request, $container);
 
         return $container;
@@ -89,12 +105,6 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
         if (!isset($container['callableResolver'])) {
             $container['callableResolver'] = function (Pimple $container): CallableResolverInterface {
                 return GeneralUtility::makeInstance(CallableResolver::class, $container['psr11-container']);
-            };
-        }
-
-        if (!isset($container['psr11-container'])) {
-            $container['psr11-container'] = function (Pimple $container): ContainerInterface {
-                return GeneralUtility::makeInstance(Psr11Container::class, $container);
             };
         }
 

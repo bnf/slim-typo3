@@ -4,6 +4,7 @@ namespace Bnf\SlimTypo3\Tests\Unit;
 use Bnf\SlimTypo3\AppRegistry;
 use Bnf\SlimTypo3\Http\SlimMiddleware;
 use Prophecy\Argument;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\App;
@@ -34,6 +35,11 @@ class SlimMiddlewareTest extends UnitTestCase
      */
     protected $requestHandler;
 
+    /**
+     * ContainerInterface
+     */
+    protected $containerProphecy;
+
     protected function setUp(): void
     {
         $this->responseProphecy = $this->prophesize();
@@ -42,12 +48,15 @@ class SlimMiddlewareTest extends UnitTestCase
         $this->requestHandler = $this->prophesize();
         $this->requestHandler->willImplement(RequestHandlerInterface::class);
         $this->requestHandler->handle(Argument::any())->willReturn($this->responseProphecy->reveal());
+
+        $this->containerProphecy = $this->prophesize();
+        $this->containerProphecy->willImplement(ContainerInterface::class);
+        $this->containerProphecy->has(Argument::any())->willReturn(false);
     }
 
     public function testCanHandleRequestForEmptyApp()
     {
-        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
-        $middleware = new SlimMiddleware($bootstrap);
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
 
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
         $this->assertSame($middleware->process($req, $this->requestHandler->reveal()), $this->responseProphecy->reveal());
@@ -55,8 +64,7 @@ class SlimMiddlewareTest extends UnitTestCase
 
     public function testCanHandleRequest()
     {
-        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
-        $middleware = new SlimMiddleware($bootstrap);
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
 
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
@@ -78,8 +86,7 @@ class SlimMiddlewareTest extends UnitTestCase
 
     public function testCanHandleRequestWithRouteArguments()
     {
-        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
-        $middleware = new SlimMiddleware($bootstrap);
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
 
         $req = $this->mockRequest(['REQUEST_URI' => '/foo/baz']);
 
@@ -104,8 +111,7 @@ class SlimMiddlewareTest extends UnitTestCase
      */
     public function testHandleRequest()
     {
-        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
-        $middleware = new SlimMiddleware($bootstrap);
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
 
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
@@ -150,8 +156,7 @@ class SlimMiddlewareTest extends UnitTestCase
 
     public function testGetAppWithRegistry()
     {
-        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
-        $middleware = new SlimMiddleware($bootstrap);
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
         $method = new \ReflectionMethod(SlimMiddleware::class, 'getContainer');
@@ -178,8 +183,7 @@ class SlimMiddlewareTest extends UnitTestCase
 
     public function testContainer()
     {
-        $bootstrap = $this->getMockBuilder(\TYPO3\CMS\Core\Core\Bootstrap::class)->disableOriginalConstructor()->getMock();
-        $middleware = new SlimMiddleware($bootstrap);
+        $middleware = new SlimMiddleware($this->containerProphecy->reveal());
         $req = $this->mockRequest(['REQUEST_URI' => '/foo']);
 
         $method = new \ReflectionMethod(SlimMiddleware::class, 'getContainer');
