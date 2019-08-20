@@ -24,7 +24,7 @@ prepare-classic-extension:
 	cd Resources/Private/PHP && composer install --no-dev --no-autoloader --ansi && rm -rf composer.json composer.lock
 	rm -rf Resources/Private/PHP/pimple/pimple/ext/
 	find Resources/Private/PHP/ -type d \( -name Tests -o -name test -o -name tests -o -name docs \) -exec rm -rf '{}' +
-	find Resources/Private/PHP/ -type f \( -name README.md -o -name README.rst -o -name CHANGELOG -o -name composer.json -o -name phpunit.xml.dist -o -name .gitignore -o -name .travis.yml \) -exec rm -f '{}' +
+	find Resources/Private/PHP/ -type f \( -name '*.rst' -o -name '*.md' -o -name CHANGELOG -o -name composer.json -o -name phpunit.xml -name phpunit.xml.dist -o -name .gitignore -o -name .travis.yml -o -name phpstan.neon.dist \) -exec rm -f '{}' +
 
 build-t3x-extension: prepare-classic-extension
 	rm -rf Resources/Private/PHP/composer/
