@@ -1,0 +1,13 @@
+services:
+  Psr\Http\Message\RequestFactoryInterface:
+    alias: Bnf\Typo3HttpFactory\RequestFactory
+  Psr\Http\Message\ResponseFactoryInterface:
+    alias: Bnf\Typo3HttpFactory\ResponseFactory
+  Psr\Http\Message\ServerResponseFactoryInterface:
+    alias: Bnf\Typo3HttpFactory\ServerRequestFactory
+  Psr\Http\Message\StreamFactoryInterface:
+    alias: Bnf\Typo3HttpFactory\StreamFactory
+  Psr\Http\Message\UploadedFileFactoryInterface:
+    alias: Bnf\Typo3HttpFactory\UploadedFileFactory
+  Psr\Http\Message\UriFactoryInterface:
+    alias: Bnf\Typo3HttpFactory\UriFactory
