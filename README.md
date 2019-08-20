@@ -1,7 +1,7 @@
 Slim Framework integration for TYPO3
 ====================================
 
-[![Build Status](https://api.travis-ci.org/bnf/slim-typo3.png)](https://travis-ci.org/bnf/slim-typo3)
+[![Build Status](https://api.travis-ci.org/bnf/slim-typo3.png?branch=master)](https://travis-ci.org/bnf/slim-typo3)
 [![Coverage Status](https://coveralls.io/repos/github/bnf/slim-typo3/badge.svg)](https://coveralls.io/github/bnf/slim-typo3)
 
 Introduction
