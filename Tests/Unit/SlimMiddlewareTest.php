@@ -32,6 +32,11 @@ class SlimMiddlewareTest extends UnitTestCase
     protected $resetSingletonInstances = true;
 
     /**
+     * ResponseInterface
+     */
+    protected $responseProphecy;
+
+    /**
      * RequestHandlerInterface
      */
     protected $requestHandler;
@@ -115,7 +120,7 @@ class SlimMiddlewareTest extends UnitTestCase
             $headers->set('Content-Length', '0');
             $response = new Response(200, $headers);
 
-            $app->get('/foo', function ($req, $res) use ($response) {
+            $app->get('/foo', function () use ($response) {
                 return $response->withStatus(201);
             });
         });
@@ -154,7 +159,7 @@ class SlimMiddlewareTest extends UnitTestCase
         $method->setAccessible(true);
 
         $executed = 0;
-        $closure = function ($app) use (&$executed) {
+        $closure = function () use (&$executed) {
             ++$executed;
         };
         $registry = GeneralUtility::makeInstance(AppRegistry::class);
