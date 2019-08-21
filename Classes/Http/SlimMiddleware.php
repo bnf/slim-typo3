@@ -16,6 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\App;
+use Slim\DefaultServicesProvider;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\RouterInterface;
 use Slim\Router;
@@ -69,6 +70,7 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
         $container->add($this->rootContainer);
 
         $pimple->register($this);
+        GeneralUtility::makeInstance(DefaultServicesProvider::class)->register($pimple);
         foreach ($this->appRegistry as $possibleServiceProvider) {
             $instance = $possibleServiceProvider;
             if (is_string($possibleServiceProvider) && class_exists($possibleServiceProvider)) {
@@ -135,16 +137,6 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
 
                 return $app;
             };
-        }
-
-        $defaultServices = new \ArrayObject;
-        GeneralUtility::makeInstance(\Slim\DefaultServicesProvider::class)->register($defaultServices);
-        foreach ($defaultServices as $service => $callable) {
-            if (!isset($container[$service])) {
-                $container[$service] = function (Pimple $container) use ($callable) {
-                    return $callable($container['psr11-container']);
-                };
-            }
         }
     }
 
