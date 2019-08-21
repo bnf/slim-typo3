@@ -61,6 +61,7 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
         $container = new MergingContainer;
         $defaultServices = [
             'psr11-container' => $container,
+            'registrations' => $this->appRegistry,
             'request' => $request,
         ];
         $pimple = new DelegatingPimple($defaultServices, $container);
@@ -113,12 +114,6 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
                 $response = $response->withProtocolVersion($container['settings']['httpVersion']);
 
                 return $response;
-            };
-        }
-
-        if (!isset($container['registrations'])) {
-            $container['registrations'] = function (Pimple $container): AppRegistry {
-                return $this->appRegistry;
             };
         }
 
