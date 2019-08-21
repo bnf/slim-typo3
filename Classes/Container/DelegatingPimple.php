@@ -17,21 +17,21 @@ final class DelegatingPimple extends Container implements ContainerInterface
     }
 
     /**
-     * @param strimg
+     * @param mixed $id
      * @return mixed
      */
     public function offsetGet($id)
     {
-        return $this->delegate->get($id);
+        return $this->delegate->get((string)$id);
     }
 
     /**
-     * @param strimg
+     * @param mixed $id
      * @return bool
      */
     public function offsetExists($id)
     {
-        return $this->delegate->has($id);
+        return $this->delegate->has((string)$id);
     }
 
     /**
