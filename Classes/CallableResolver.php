@@ -24,7 +24,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class CallableResolver implements CallableResolverInterface
 {
     /**
-     * @var ContainerInterface
+     * @var ContainerInterface|null
      */
     private $container;
 
@@ -69,7 +69,7 @@ final class CallableResolver implements CallableResolverInterface
 
             // check for slim callable as "class:method"
             $callablePattern = '!^([^\-\:]+)(?:\-\>|\:)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
-            if (preg_match($callablePattern, $toResolve, $matches)) {
+            if (preg_match($callablePattern, $toResolve, $matches) === 1) {
                 $class = $matches[1];
                 $method = $matches[2];
             }
