@@ -36,15 +36,26 @@ final class MergingContainer implements ContainerInterface
      */
     public function get($id)
     {
+        $previous = null;
+
         foreach ($this->containers as $container) {
             if ($container->has($id)) {
                 try {
                     return $container->get($id);
                 } catch (NotFoundExceptionInterface $e) {
+                    $previous = $e;
                     // Try next container
                     continue;
                 }
             }
+        }
+
+        if ($previous !== null) {
+            throw new NotFoundException(
+                'Failed to create container entry "' . $id . '". Reason: ' . $previous->getMessage(),
+                1566397347,
+                $previous
+            );
         }
 
         throw new NotFoundException('Container entry "' . $id . '" is not available.', 1566324513);
