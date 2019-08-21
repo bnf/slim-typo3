@@ -87,8 +87,9 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
      * Registers containers
      *
      * @param Pimple $container
+     * @return void
      */
-    public function register(Pimple $container)
+    public function register(Pimple $container): void
     {
         if (!isset($container['pimple'])) {
             /* Provide access to pimple from the psr11-container wrapper */
@@ -154,7 +155,7 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
 
     /**
      * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
+     * @param RequestHandlerInterface $nextHandler
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $nextHandler): ResponseInterface
@@ -180,7 +181,6 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
     /**
      * Handles a frontend request
      *
-     * @param  ContainerInterface     $container
      * @param  ServerRequestInterface $request
      * @return ResponseInterface
      */
@@ -192,6 +192,7 @@ class SlimMiddleware implements MiddlewareInterface, RequestHandlerInterface, Se
     /**
      * Handles a frontend request
      *
+     * @param  ContainerInterface     $container
      * @param  ServerRequestInterface $request
      * @return ResponseInterface
      */

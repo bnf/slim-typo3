@@ -7,3 +7,4 @@
 /.editorconfig export-ignore
 /Makefile export-ignore
 /phpunit.xml.dist export-ignore
+/phpstan.neon.dist export-ignore

@@ -32,6 +32,7 @@ before_script:
 
 script:
   - find . -name \*.php ! -path "./.build/*" -exec php -l {} >/dev/null \;
+  - .build/vendor/bin/phpstan analyze
   - if [[ "$ANALYSIS" != 'true' ]]; then .build/vendor/bin/phpunit ; fi
   - if [[ "$ANALYSIS" == 'true' ]]; then .build/vendor/bin/phpunit --coverage-text --coverage-clover clover.xml ; fi
 
