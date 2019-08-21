@@ -1,0 +1,13 @@
+includes:
+    - .build/vendor/bnf/phpstan-psr-container/extension.neon
+    - .build/vendor/saschaegerer/phpstan-typo3/extension.neon
+    - .build/vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+  level: max
+
+  paths:
+    - Classes
+
+  ignoreErrors:
+    - '#Parameter .1 .container of method Slim.DefaultServicesProvider::register.. expects Slim.Container, ArrayObject given.#'
