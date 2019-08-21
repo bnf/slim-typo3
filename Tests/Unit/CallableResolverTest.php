@@ -87,7 +87,7 @@ class CallableResolverTest extends UnitTestCase
         $resolver = new CallableResolver($this->container);
         $this->expectException('\InvalidArgumentException');
         $this->expectExceptionMessage('must not start with a backslash');
-        $callable = $resolver->resolve('\\' . CallableTest::class . '->toCall');
+        $resolver->resolve('\\' . CallableTest::class . '->toCall');
     }
 
     public function testSlimCallableContainer()
@@ -108,7 +108,7 @@ class CallableResolverTest extends UnitTestCase
 
     public function testResolutionToAnInvokableClassInContainer()
     {
-        $this->container['an_invokable'] = function ($c) {
+        $this->container['an_invokable'] = function () {
             return new InvokableTest();
         };
         $resolver = new CallableResolver($this->container);
