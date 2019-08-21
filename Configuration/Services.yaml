@@ -3,7 +3,7 @@ services:
     alias: Bnf\Typo3HttpFactory\RequestFactory
   Psr\Http\Message\ResponseFactoryInterface:
     alias: Bnf\Typo3HttpFactory\ResponseFactory
-  Psr\Http\Message\ServerResponseFactoryInterface:
+  Psr\Http\Message\ServerRequestFactoryInterface:
     alias: Bnf\Typo3HttpFactory\ServerRequestFactory
   Psr\Http\Message\StreamFactoryInterface:
     alias: Bnf\Typo3HttpFactory\StreamFactory

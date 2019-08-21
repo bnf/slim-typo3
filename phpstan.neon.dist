@@ -8,6 +8,8 @@ parameters:
 
   paths:
     - Classes
+    - ext_localconf.php
 
   ignoreErrors:
     - '#Parameter .1 .container of method Slim.DefaultServicesProvider::register.. expects Slim.Container, ArrayObject given.#'
+    - '#Constant TYPO3_version not found.#'
