@@ -1,4 +1,20 @@
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Bnf\SlimTypo3\:
+    resource: '../Classes/*'
+
+  Bnf\Typo3Middleware\ExtbaseMiddleware:
+    class: Bnf\Typo3Middleware\ExtbaseMiddleware
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  # TODO move to Configuration/Services.php and conditionally apply these depending on the TYPO3 branch
+  # (to not add alias as of 10.4.2, as it already contains classes in core)
   Psr\Http\Message\RequestFactoryInterface:
     alias: Bnf\Typo3HttpFactory\RequestFactory
   Psr\Http\Message\ResponseFactoryInterface:
