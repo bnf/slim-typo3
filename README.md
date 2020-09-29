@@ -44,6 +44,8 @@ That's all and now your route controller should be executed when requesting `/he
 
 ### Full Example
 
+* TODO: Configuration/Services.yaml – tag based registration
+
 ext_localconf.php:
 
 ```php
